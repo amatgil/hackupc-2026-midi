@@ -1,4 +1,4 @@
 
 
 main:
-	gcc -o encaranotenimnom.x main.c
+	g++ -o  encaranotenimnom.x main.cc
