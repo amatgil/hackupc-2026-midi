@@ -1,6 +1,7 @@
 #include "window_midi_editor.hh"
 #include "raymath.h"
 #include "utils.hh"
+#include "window_common.hh"
 #include <array>
 
 #define RAYGUI_IMPLEMENTATION
@@ -44,7 +45,7 @@ void drawGrid(int xoffset, int yoffset, int col_width, int row_width) {
 Rectangle getNoteRect(const Sheet &sheet, int i) {
     return Rectangle{sheet.timestamps_start[i] * pixels_per_second +
                          xscroll_offset,
-                     (float)sheet.pitch[i] * row_width + yscroll_offset,
+                     (float)(87-sheet.pitch[i]) * row_width + yscroll_offset,
                      sheet.durations[i] * pixels_per_second, row_width - 1};
 }
 
@@ -72,7 +73,7 @@ void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
             mPos.y -= yscroll_offset + dragging_offset.y;
             mPos.x /= pixels_per_second;
             mPos.y /= row_width;
-            sheet.pitch[i] = (int)mPos.y;
+            sheet.pitch[i] = 87-(int)mPos.y;
             sheet.timestamps_start[i] = mPos.x;
         }
     }
@@ -124,7 +125,7 @@ void initEditor() {
 void toolCreate(Sheet &sheet, Vector2 mPos) {
     palette_sheet.timestamps_start[0] =
         (mPos.x - xscroll_offset) / pixels_per_second;
-    palette_sheet.pitch[0] = (mPos.y - yscroll_offset) / row_width;
+    palette_sheet.pitch[0] = 87- (int)((mPos.y - yscroll_offset) / row_width);
     Rectangle nRec = getNoteRect(palette_sheet, 0);
     DrawRectangleRounded(nRec, 0.5, 5, Color{GRAY.r, GRAY.g, GRAY.b, 128});
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
@@ -181,7 +182,7 @@ void drawGUI() {
     DrawTexturePro(
         piano_texture_vertical,
         { 0, 0, (float)120, (float)2644 },
-        { 0, h * 0.1f, w * 0.15f, h * 0.85f },
+        { 0, (float)yscroll_offset, 120, 88*row_width },
         { 0, 0 },
         0,
         WHITE
@@ -196,9 +197,8 @@ void drawSoundTimeline(Sheet &sheet) {
     else
         xscroll_offset += GetMouseWheelMove() * 30;
 
-    ClearBackground(COLOR_BACKGROUND);
-    if (xscroll_offset > 0)
-        BeginScissorMode(xscroll_offset, 0, w, h);
+    ClearBackground(COLOR_BACKGROUND_DARK);
+    BeginScissorMode(xscroll_offset, yscroll_offset, w, 87*row_width);
     ClearBackground(COLOR_BACKGROUND);
     EndScissorMode();
 
