@@ -112,7 +112,7 @@ void test_full_parse() {
   printvector(sheet.attack_velocities);
   printvector(sheet.pitch);
 }
-
+/*
 void test_FFT_samples_calling() {
   Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
   float* ret = extreu_fft_from_wav(&la);
@@ -121,5 +121,5 @@ void test_FFT_samples_calling() {
     double freq = (double)i * la.sampleRate / (double)N;
     printf("%f %f\n", freq, ret[i]);
   }    
-}
+}*/
 

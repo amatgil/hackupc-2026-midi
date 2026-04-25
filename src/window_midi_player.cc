@@ -45,6 +45,9 @@ void play_midi(const Sheet& sheet)
 		bool is_flat = flat_notes.find(sheet.pitch[i]) != flat_notes.end();
 		float width = (is_flat) ? 0.5f : 1.0f;
 		float height = (float)sheet.durations[i] * VERTICAL_SCALE;
+
+		printf("Pitch: %d\n",sheet.pitch[i]);
+
 		float x = pitch_to_position.at(sheet.pitch[i]) + ((is_flat) ? 0.25f : 0.0f);
 		float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height - INITIAL_DELAY * VERTICAL_SCALE;
 

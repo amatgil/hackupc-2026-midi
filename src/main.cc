@@ -18,7 +18,7 @@
 void run_tests() {
   //parse_header_from_file();
   //test_FFT_samples();
-  test_FFT_samples_calling();
+  test_FFT_samples();
   //test_variable_length_quantity();
   test_full_parse();
 }  
