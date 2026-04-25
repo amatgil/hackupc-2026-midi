@@ -62,12 +62,6 @@ double *which_pitch_is_playing_at_each_time_instance(float *samples,
     float max_freq = -1;
     float max_freq_amplitude = -1;
 
-  /*   for (int j = 0; j < FFT_CHUNK_SIZE/2; j++) {
-        double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
-        printf("%f, %f\n", freq, fft_of_chunk[j]);
-    } */
-
-
     for (int j = 0; j < FFT_CHUNK_SIZE/2; ++j) {
       double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
       if (fft_of_chunk[j] > max_freq_amplitude) {
