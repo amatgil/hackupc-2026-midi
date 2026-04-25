@@ -55,7 +55,7 @@ void draw_midi_player_screen()
 
     EndMode2D();
 
-	Rectangle dest = { 0, GetScreenHeight() / 2.0f, (float)GetScreenWidth(), GetScreenHeight() / 2.0f};
+	Rectangle dest = { 0, GetScreenHeight() * (1.0f-PIANO_VERTICAL_WINDOW_PROPORTION), (float)GetScreenWidth(), GetScreenHeight() * PIANO_VERTICAL_WINDOW_PROPORTION };
 	Vector2 origin = { 1.0f / 2.0f, 1.0f / 2.0f };
 
 	DrawTexturePro
