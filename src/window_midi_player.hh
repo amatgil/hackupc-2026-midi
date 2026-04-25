@@ -16,7 +16,7 @@
 
 #define PIANO_VERTICAL_WINDOW_PROPORTION 1.0f/5.0f
 
-#define INITIAL_DELAY 0.0f
+#define INITIAL_DELAY 5.0f
 
 #define BACKGROUND_ROTATION -15.0f
 #define BACKGROUND_SPEED 5.0f
@@ -26,6 +26,7 @@
 typedef struct {
 	Vector2 position;
 	Vector2 size;
+	bool played;
 } midi_player_note;
 
 void initialize_midi_player();

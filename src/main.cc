@@ -18,6 +18,23 @@ void run_tests() {
   parse_header_from_file();
 }
 
+Sheet generate_full_piano_sheet()
+{
+    Sheet sheet;
+
+    sheet.total_duration = 88.0f;
+
+    for (int i = 0; i < 88; ++i)
+    {
+        sheet.timestamps_start.push_back((float)i);
+        sheet.durations.push_back(1.0f);
+        sheet.pitch.push_back(i);
+        sheet.attack_velocities.push_back(100);
+    }
+
+    return sheet;
+}
+
 int main(int argc, char* argv[])
 {
   if (argc == 2 && argv[1][0] == 't') {
@@ -40,14 +57,8 @@ int main(int argc, char* argv[])
 
     initialize_midi_player();
 
-    Sheet sheet =
-    {
-        {0,1,2,3,4}, // timestamps_start
-        {1,1,1,1,1}, // durations
-        {0,13,28,39,51}, // pitch
-		{100,100,100,100,100}, // attack_velocities
-		5 // total_duration
-    };
+    Sheet sheet = generate_full_piano_sheet();
+
 	play_midi(sheet);
 
 	fftw_plan plan{};
@@ -65,7 +76,7 @@ int main(int argc, char* argv[])
 		update_midi_playback(deltaTime);
         draw_midi_player_screen();
 
-        drawSoundTimeline(sheet);
+        //drawSoundTimeline(sheet);
 
         EndDrawing();
 

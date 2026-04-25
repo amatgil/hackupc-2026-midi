@@ -1,6 +1,8 @@
 #ifndef NOTE_PLAYER_HH
 #define NOTE_PLAYER_HH
 
+#include <cstdio>
+
 #include "raylib.h"
 
 void load_note_sounds();

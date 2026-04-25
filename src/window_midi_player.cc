@@ -48,6 +48,7 @@ void play_midi(const Sheet& sheet)
 
 		notes[i].position = { x, y };
 		notes[i].size = { width, height };
+		notes[i].played = false;
 
 		printf("Note %d: position=(%f, %f), size=(%f, %f)\n", i, x, y, width, height);
 	}
@@ -72,13 +73,10 @@ void update_midi_playback(const float deltaTime)
 	for (int i = 0; i < notes_count; ++i)
 	{
 		notes[i].position.y += VERTICAL_SCALE * deltaTime;
-		if (notes[i].position.y >= 0)
+		if (notes[i].position.y >= 0 && !notes[i].played	)
 		{
-			//printf("Playing note %d at time %f seconds\n", i, playing_time);
-			// Here you can add code to play the sound associated with the note
-			// For example, you could use PlaySound() from raylib to play a sound file
-			// PlaySound(note_sound);
-			//notes[i].position.y = 0; // Keep the note at the piano level
+			notes[i].played = true;
+			play_note_sound((unsigned int)notes[i].position.x + 26, 2);
 		}
 	}
 }
