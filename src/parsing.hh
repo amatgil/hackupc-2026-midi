@@ -47,9 +47,9 @@ typedef struct {
   // midi event: 
 } MetaEvent;
 
-Sheet *parse_midi(unsigned char *text, unsigned int text_length);
+Sheet parse_midi(unsigned char *text, unsigned int text_length);
 Header parse_header(unsigned char* text, unsigned int text_length);
-
+void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longitud_llegida, Sheet& sheet);
 uint32_t read_big_endian_4_bytes(unsigned char *text);
 uint16_t read_big_endian_2_bytes(unsigned char *text);
 uint64_t read_variable_length_quantity(unsigned char *text, unsigned int& size);

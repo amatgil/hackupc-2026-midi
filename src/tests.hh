@@ -56,3 +56,48 @@ void test_FFT_samples() {
 
   UnloadWaveSamples(samples);  
 }
+
+
+void printvector(const vector<float>& v) {
+  for (auto x: v) {
+    printf("%f, ", x);
+  }
+  printf("\n");
+}
+void printvector(const vector<unsigned int>& v) {
+  for (auto x: v) {
+    printf("%d, ", x);
+  }
+  printf("\n");
+}
+
+void test_full_parse() {
+  printf("Testing parse del header del fitxer simple \n");
+  FILE* fptr = fopen("../assets/testfiles/SimpleMidi.mid", "r");
+  assert(fptr != NULL);
+  unsigned int i = 0, c;
+  unsigned char* s = (unsigned char*)malloc(10000);
+  
+  while ((c = fgetc(fptr)) != EOF) {
+    s[i] = c;
+    i++;
+  }
+  
+  Sheet sheet = parse_midi(s, i);
+  printvector(sheet.timestamps_start);
+  printvector(sheet.durations);
+  printvector(sheet.attack_velocities);
+  printvector(sheet.pitch);
+}
+
+
+/*
+typedef struct {
+  vector<float> timestamps_start;
+  vector<float> durations;
+  // Un enter menut que s'associa amb una frequencia
+  vector<unsigned int> pitch;
+  vector<unsigned int> attack_velocities;
+  float total_duration; // en segons
+} Sheet;
+*/

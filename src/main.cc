@@ -15,9 +15,10 @@
 #define SCREEN_HEIGHT 450
 
 void run_tests() {
-  parse_header_from_file();
-  test_FFT_samples();
+  //parse_header_from_file();
+  //test_FFT_samples();
   //test_variable_length_quantity();
+  test_full_parse();
 }  
 
 int main(int argc, char* argv[])
