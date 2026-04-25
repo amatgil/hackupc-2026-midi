@@ -132,7 +132,7 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longi
           // Note On (Amb velocitat > 0)
           if (event_type == 0x9 && data2 > 0) {
             //printf("Entered NoteON (Pitch: %d, Vel: %d)\n", data1, data2);
-            if (data1 > 87) data1 = 87;
+
             keys_held_start[data1] = current_time;
             keys_held_velocity[data1] = data2;
           }
@@ -146,7 +146,8 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longi
             
             sheet.timestamps_start.push_back(keys_held_start[data1]); 
             sheet.durations.push_back(duration); 
-            sheet.pitch.push_back(data1); 
+            if (data1-21 > 87) data1 = 87+21;
+            sheet.pitch.push_back(data1-21);
             sheet.attack_velocities.push_back(keys_held_velocity[data1]); 
           }
       }
