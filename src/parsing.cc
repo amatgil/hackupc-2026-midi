@@ -30,6 +30,12 @@ Header parse_header(unsigned char* text, unsigned int text_length) {
 
 
 void parse_track_chunk(unsigned char *text, unsigned int text_length) {
+
+  Sheet sheet;
+
+  vector<int> keys_held_start    = vector<int>(128, 0);
+  vector<int> keys_held_velocity = vector<int>(128, 0);
+
   // TODO: Error out more gracefully if tag is wrong
   assert(text[0] == 'M');
   assert(text[1] == 'T');
@@ -42,11 +48,13 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length) {
   unsigned char *end_of_chunk = current + length;
 
   unsigned char running_status;
+  unsigned int current_time = 0;
   while(current < end_of_chunk) {
     // 1. Llegir v-time
     unsigned int vtime_size = 0;
     uint64_t vtime = read_variable_length_quantity(current, vtime_size);
     current += vtime_size;
+    current_time += vtime;
 
     // 2. Llegir l'event status
     unsigned char status = *current;
@@ -85,6 +93,35 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length) {
     }
     else {
       // MIDIEvents: Note on, Note off, ...
+              // --- Standard MIDI Event ---
+      unsigned char event_type = status >> 4; // Top 4 bits dictate the event type
+      unsigned char channel = status & 0x0F;
+      
+      // Program Change (0xC) and Channel Pressure (0xD) only have 1 data byte.
+      // All other standard MIDI events have 2 data bytes.
+      if (event_type == 0xC || event_type == 0xD) {
+          unsigned char data1 = *current++;
+          // We'll ignore both of them :D
+      } else {
+          // Note Off (0x8), Note On (0x9), Poly Pressure (0xA), 
+          // Control Change (0xB), Pitch Bend (0xE)
+          unsigned char data1 = *current++;
+          unsigned char data2 = *current++;
+          
+          if (event_type == 0x9) {
+            /* Note On */
+            unsigned int key_index = data1;
+            keys_held_start[data1] = current_time;
+            keys_held_velocity[data1] = data2;
+          }
+
+          if (event_type == 0x8) {
+            sheet.timestamps_start.push_back(keys_held_start[data1]); 
+            sheet.durations.push_back(vtime); 
+            sheet.pitch.push_back(data1); 
+            sheet.attack_velocities.push_back(data2); 
+          }
+      }
     }
   }
   
