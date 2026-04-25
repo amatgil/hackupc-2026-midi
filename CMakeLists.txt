@@ -23,14 +23,14 @@ if (NOT raylib_FOUND)
     GIT_TAG        5.5
   )
 
-  FetchContent_Declare(
-  fftw
-  URL https://www.fftw.org/fftw-3.3.11.tar.gz
-  )
 
   FetchContent_MakeAvailable(raylib)
-  FetchContent_MakeAvailable(fftw)
 endif()
+FetchContent_Declare(
+fftw
+URL https://www.fftw.org/fftw-3.3.11.tar.gz
+)
+FetchContent_MakeAvailable(fftw)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC src)
