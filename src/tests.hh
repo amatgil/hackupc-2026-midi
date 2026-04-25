@@ -104,11 +104,16 @@ void test_FFT_with_chunking_yay() {
     for (int i = 0; i < N; ++i) {
       samples[i] = (double)((samples_interleaved[2 * i] + samples_interleaved[2 * i + 1]) * 0.5); // Average
     }
+    free(samples_interleaved);
   }
 
   float* pitches = which_pitch_is_playing_at_each_time_instance(samples, la.frameCount, la.sampleRate);
-
   for (int i = 0; i < la.frameCount / FFT_CHUNK_SIZE; ++i) {
     printf("%i %f\n", i, pitches[i]);
   }
+  free(pitches);
+
+  free(samples);
+
+  UnloadWave(la);
 }  

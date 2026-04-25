@@ -4,8 +4,7 @@
 
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length,
-                               float sampleRate
-                                   ) {
+                               float sampleRate) {
   int N = sample_length;
   fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
   fftw_complex *out = in; // in-place
@@ -69,6 +68,8 @@ float *which_pitch_is_playing_at_each_time_instance(float *samples,
         max_freq = freq;
       }
     }
+
+    free(fft_of_chunk);    
 
     ret[i] = max_freq;
   }
