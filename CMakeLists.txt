@@ -17,6 +17,6 @@ FetchContent_MakeAvailable(raylib)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC})
 
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC src)
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC src src/vendor)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} raylib)

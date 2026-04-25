@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 
 using namespace std;
@@ -7,5 +8,5 @@ typedef struct {
   vector<float> durations;
   vector<int> note;
   vector<int> attack_velocity;
-  
+
 } Sheet;
