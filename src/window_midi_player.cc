@@ -9,6 +9,7 @@ midi_player_note* notes = nullptr;
 
 Texture2D piano_texture;
 Texture2D background_texture_checkerboard;
+Texture2D background_gradient;
 
 float background_texture_x = 0.0f;
 float background_texture_y = 0.0f;
@@ -142,11 +143,23 @@ void draw_background()
 	}
 }
 
+void draw_background_gradient()
+{
+	DrawTexturePro(background_gradient,
+		{ 0, 0, (float)200, (float)200 },
+		{ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() },
+		{ 0, 0 },
+		0,
+		WHITE
+	);
+}
+
 void draw_midi_player_screen()
 {
     ClearBackground(COLOR_BACKGROUND);
 
 	draw_background();
+	draw_background_gradient();
 
 	draw_piano();
 
