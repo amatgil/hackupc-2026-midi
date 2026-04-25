@@ -62,6 +62,10 @@ int main(int argc, char* argv[])
     InitAudioDevice();
     SetTargetFPS(60);
 
+    BeginDrawing();
+	DrawText("Loading... Shouldn't take more than 3 hours...", 10, 10, 20, WHITE);
+    EndDrawing();
+
     load_common_gui_assets();
 
     initialize_midi_player();
