@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <cmath>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "raylib.h"
 #include "sheet.hh"
@@ -12,6 +13,7 @@
 
 #define COLOR_BACKGROUND (Color){ 88, 8, 94, 255 }
 #define COLOR_NOTE (Color){ 212, 16, 230, 255 }
+#define COLOR_NOTE_FLAT (Color){ 176, 16, 202, 255 }
 
 #define VERTICAL_SCALE 10.0f
 
@@ -115,11 +117,17 @@ const unordered_map<unsigned int, float> pitch_to_position = {
 	{ 87, 25 },
 };
 
+const unordered_set<int> flat_notes =
+{
+	1, 4, 6, 9, 11, 13, 16, 18, 21, 23, 25, 28, 30, 33, 35, 37, 40, 42, 45, 47, 49, 52, 54, 57, 59, 61, 64, 66, 69, 71, 73, 76, 78, 81, 83, 85
+};
+
 typedef struct {
 	Vector2 position;
 	Vector2 size;
 	int pitch;
 	bool played;
+	bool is_flat;
 } midi_player_note;
 
 void initialize_midi_player();
