@@ -9,5 +9,5 @@ typedef struct {
   // Un enter menut que s'associa amb una frequencia
   vector<unsigned int> pitch;
   vector<unsigned int> attack_velocities;
-  unsigned int total_duration; // en segons
+  float total_duration; // en segons
 } Sheet;
