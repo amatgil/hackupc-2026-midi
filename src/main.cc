@@ -11,7 +11,6 @@
 
 #include "sheet.hh"
 #include "parsing.hh"
-#include "fft.hh"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
