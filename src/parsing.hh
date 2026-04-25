@@ -12,6 +12,6 @@ typedef struct {
 } Header;  
 
 Sheet *parse_midi(unsigned char *text, unsigned int text_length);
-Header parse_headers(unsigned char* text, unsigned int text_length);
+Header parse_header(unsigned char* text, unsigned int text_length);
 uint32_t read_big_endian_4_bytes(unsigned char *text);
 uint16_t read_big_endian_2_bytes(unsigned char *text);
