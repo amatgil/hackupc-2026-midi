@@ -1,9 +1,11 @@
 #include "parsing.hh"
 #include "fft.hh"
 #include <stdlib.h>
+#include <complex.h> 
+#include <fftw3.h>
 
 void parse_header_from_file() {
-  printf("Testing parse del header del fitxer simple \n");
+  //printf("Testing parse del header del fitxer simple \n");
   FILE* fptr = fopen("../assets/testfiles/SimpleMidi.mid", "r");
   assert(fptr != NULL);
   int i = 0, c;
@@ -42,17 +44,31 @@ void test_variable_length_quantity() {
 }
 
 void test_FFT_samples() {
-  // parse_header_from_file();
-  Wave la = LoadWave("../assets/samples/Mf A4.wav");
-  printf("Got wav\n");
+  Wave la = LoadWave("../assets/samples/Note_FF_24.wav");
   float* samples = LoadWaveSamples(la);
-  int N = la.frameCount * la.channels;
-  printf("Got samples\n");
-  FFT(samples, N);
 
-  for (unsigned int i = 0; i < N; i++) {
-    printf("%i -> %f\n", i, samples[i]);
+  assert(la.channels == 2); // TODO: Accepta un channel només, també
+  int N = la.frameCount;
+  fftw_complex* in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+  fftw_complex* out = in; // in-place
+
+  fftw_plan p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+
+  for (int i = 0; i < N; ++i) {
+    in[i][0] = (double)((samples[2 * i] + samples[2 * i + 1]) * 0.5); // Average
+    in[i][1] = 0.0;
+  }
+
+  fftw_execute(p);
+  for (unsigned int i = 0; i < N/5; i++) {
+    double freq = (double)i * la.sampleRate / (double)N;
+    double re = out[i][0];
+    double im = out[i][1];
+    printf("%f, %f\n", freq, 2 * sqrt(re*re + im*im) / N);
   }    
+  fftw_destroy_plan(p);
+  fftw_free(in);
+
 
   UnloadWaveSamples(samples);  
 }
