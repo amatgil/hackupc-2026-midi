@@ -1,31 +1,20 @@
 /**
  * Fragment extret de https://github.com/mackron/miniaudio/blob/master/examples/simple_capture.c
  */
-#include "miniaudio.c"
-#include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
-#include <queue>
+#include "audio_recording.hh"
 
 
 using namespace std;
 
-std::vector<float> results;
-
-void print_vec(vector<float> v) {
-    for (int i = 0; i < v.size(); ++i) cout << v[i] << endl;
-}
-
 void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
     float* p = (float*)pInput;
     while(p < pInput+frameCount) {
-        results.push_back(*p);
+        microphone_buffer.push_back(*p);
         p = p+1;
     }
 
     (void)pOutput;
 }
-
 
 ma_result result;
 ma_encoder_config encoderConfig;
@@ -57,6 +46,7 @@ void start_recording() {
 }
 
 void stop_recording() {
+    microphone_buffer.clear();
     ma_device_uninit(&device);
     ma_encoder_uninit(&encoder);
 }
