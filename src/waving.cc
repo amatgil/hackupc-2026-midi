@@ -1,4 +1,5 @@
 #include "waving.hh"
+#include "sheet.hh"
 #include "fftw3.h"
 #include <cstdint>
 #include <cstdio>
@@ -75,4 +76,74 @@ double *which_pitch_is_playing_at_each_time_instance(float *samples,
     ret[i] = max_freq;
   }
   return ret;
+}
+
+unsigned int frequency_to_pitch(float freq) {
+  // doubling here -> adding 12 there
+  // 440Hz -> 48
+
+  float logarithm = log(freq/440) / log(2);
+  return 12 * logarithm + 48;
+}
+
+void add_note_to_sheet(Sheet *s, float offset, unsigned int past_note_start_i,
+                       float sampleRate, unsigned int i,
+                       float past_note_frequency) {
+  s->timestamps_start.push_back(offset +
+                               past_note_start_i * FFT_CHUNK_SIZE / sampleRate);
+  s->durations.push_back((i - past_note_start_i) * FFT_CHUNK_SIZE / sampleRate);
+  s->pitch.push_back(frequency_to_pitch(past_note_frequency));
+  s->attack_velocities.push_back(0); // No s'utilitza
+}
+
+// Always >= 1
+float ratio_between(float a, float b) {
+  return max(a, b) / min(a, b);
+}  
+
+// Takes samples at sample_rate and return Sheet
+Sheet pitches_to_sheet(double *pitches, size_t number_pitches, float sampleRate,
+                       float offset) {
+  Sheet s;
+  double past_note_frequency = 0; // Notes below 25Hz do not exist
+  unsigned int past_note_start_i = 0;
+
+  for (unsigned int i = 0; i < number_pitches-1; ++i) {
+    if (pitches[i] < 25 && past_note_frequency > 25) {
+      add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, i, past_note_frequency);
+    }
+    else if (pitches[i] > 25 && past_note_frequency > 25) {
+      if (ratio_between(pitches[i], past_note_frequency) >
+          MAX_FREQ_RATIO_THRESHOLD) {
+        add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, i,
+                          past_note_frequency);
+      } else {
+        past_note_frequency += pitches[i] / (i - past_note_start_i) -
+                               past_note_frequency / (i-past_note_start_i+1);
+
+      }        
+
+    }
+    else if (pitches[i] < 25 && past_note_frequency < 25) {
+      // No tenim cap nota, estem en silenci, cap problema
+    }
+    else if (pitches[i] > 25 && past_note_frequency < 25) {
+      past_note_start_i = i;
+    }
+
+    past_note_frequency = pitches[i];
+  }
+  return s;
+}
+
+Sheet read_sheet_from_samples(float *samples, size_t sample_length,
+                          float sampleRate) {
+
+  double *pitches_per_time =
+      which_pitch_is_playing_at_each_time_instance(samples, sample_length,
+                                                   sampleRate);
+
+  Sheet ret = pitches_to_sheet(pitches_per_time, sample_length / FFT_CHUNK_SIZE, sampleRate, 0.0);
+  free(pitches_per_time);
+  return ret;  
 }

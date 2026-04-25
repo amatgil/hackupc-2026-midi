@@ -6,6 +6,7 @@
 #include "fftw3.h"
 #include "app_mode.hh"
 
+#include "waving.hh"
 #include "window_midi_editor.hh"
 #include "window_midi_player.hh"
 
@@ -63,7 +64,21 @@ int main(int argc, char* argv[])
 
     initialize_midi_player();
 
-    Sheet sheet = read_midi_file("../assets/testfiles/Op10No3Midi.mid", 120);
+    //Sheet sheet = read_midi_file("../assets/testfiles/Op10No3Midi.mid", 120);
+    
+  Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
+  float *samples_interleaved = LoadWaveSamples(la);
+  float* samples = (float*)malloc(la.frameCount*sizeof(float));
+  int N = la.frameCount;
+  if (la.channels == 1) {
+    samples = samples_interleaved;
+  } else if (la.channels == 2) {
+    for (int i = 0; i < N; ++i) {
+      samples[i] = (double)((samples_interleaved[2 * i] + samples_interleaved[2 * i + 1]) * 0.5); // Average
+    }
+    free(samples_interleaved);
+  }
+  Sheet sheet = read_sheet_from_samples(samples, la.frameCount, la.sampleRate);
 
 
 	fftw_plan plan{};
