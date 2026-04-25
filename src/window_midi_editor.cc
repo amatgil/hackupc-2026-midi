@@ -21,6 +21,7 @@ const int pixels_per_second = 100;
 const int row_width = 20;
 
 static int dragging_note = -1;
+static int dragging_old_y_pos = -1;
 static Vector2 dragging_offset = {0, 0};
 static Tools tool = Move;
 static float new_note_duration = 1.0f;
@@ -57,12 +58,15 @@ void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
         DrawRectangleLines(nRec.x + 2, nRec.y + 2, nRec.width - 2,
                            nRec.height - 2, ORANGE);
     }
-    if (IsMouseButtonUp(MOUSE_LEFT_BUTTON))
+    if (IsMouseButtonUp(MOUSE_LEFT_BUTTON)) {
         dragging_note = -1;
+        dragging_old_y_pos = -1;
+    }
 
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) and dragging_note == -1 and
         CheckCollisionPointRec(mPos, nRec)) {
         dragging_note = i;
+        dragging_old_y_pos = sheet.pitch[i];
         dragging_offset.x = mPos.x - nRec.x;
         dragging_offset.y = mPos.y - nRec.y;
     }
@@ -75,6 +79,14 @@ void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
             mPos.y /= row_width;
             sheet.pitch[i] = 87-(int)mPos.y;
             sheet.timestamps_start[i] = mPos.x;
+
+			if (sheet.pitch[i] > 87) sheet.pitch[i] = 87;
+            if (sheet.pitch[i] < 0) sheet.pitch[i] = 0;
+
+            if (sheet.pitch[i] != dragging_old_y_pos) {
+                play_note_sound(sheet.pitch[i], sheet.attack_velocities[i]);
+			}
+            dragging_old_y_pos = sheet.pitch[i];
         }
     }
 }
@@ -90,6 +102,8 @@ void splitTool(Vector2 mPos, Rectangle nRec, Sheet &sheet, int i) {
         sheet.attack_velocities.push_back(sheet.attack_velocities[i]);
         sheet.timestamps_start.push_back(sheet.timestamps_start[i] +
                                          duration_cut);
+
+        play_note_sound(sheet.pitch[i], sheet.attack_velocities[i]);
     }
 }
 
@@ -129,10 +143,14 @@ void toolCreate(Sheet &sheet, Vector2 mPos) {
     Rectangle nRec = getNoteRect(palette_sheet, 0);
     DrawRectangleRounded(nRec, 0.5, 5, Color{GRAY.r, GRAY.g, GRAY.b, 128});
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+		if (palette_sheet.pitch[0] > 87) palette_sheet.pitch[0] = 87;
+		if (palette_sheet.pitch[0] < 0) palette_sheet.pitch[0] = 0;
         sheet.attack_velocities.push_back(palette_sheet.attack_velocities[0]);
         sheet.pitch.push_back(palette_sheet.pitch[0]);
         sheet.durations.push_back(palette_sheet.durations[0]);
         sheet.timestamps_start.push_back(palette_sheet.timestamps_start[0]);
+
+		play_note_sound(palette_sheet.pitch[0], palette_sheet.attack_velocities[0]);
     }
 }
 
