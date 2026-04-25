@@ -15,6 +15,7 @@
 
 void run_tests() {
   parse_header_from_file();
+  test_variable_length_quantity();
 }  
 
 int main(int argc, char* argv[])
