@@ -4,9 +4,10 @@
 using namespace std;
 
 typedef struct {
-  vector<float> timestamp_start;
+  vector<float> timestamps_start;
   vector<float> durations;
-  vector<int> note;
-  vector<int> attack_velocity;
-
+  // Un enter menut que s'associa amb una frequencia
+  vector<unsigned int> pitch;
+  vector<unsigned int> attack_velocities;
+  unsigned int total_duration; // en segons
 } Sheet;
