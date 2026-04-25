@@ -44,31 +44,37 @@ void test_variable_length_quantity() {
 }
 
 void test_FFT_samples() {
-  Wave la = LoadWave("../assets/samples/Note_FF_24.wav");
+  Wave la = LoadWave("../assets/samples/Note_24.wav");
   float* samples = LoadWaveSamples(la);
 
-  assert(la.channels == 2); // TODO: Accepta un channel només, també
+  printf("Channels = %i\n", la.channels);
+  assert(la.channels == 1 || la.channels == 2);
   int N = la.frameCount;
-  fftw_complex* in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
-  fftw_complex* out = in; // in-place
-
+  fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
+  fftw_complex *out = in; // in-place
   fftw_plan p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
-  for (int i = 0; i < N; ++i) {
-    in[i][0] = (double)((samples[2 * i] + samples[2 * i + 1]) * 0.5); // Average
-    in[i][1] = 0.0;
+  if (la.channels == 1) {
+    for (int i = 0; i < N; ++i) {
+      in[i][0] = samples[i];
+      in[i][1] = 0.0;
+    }
+  } else if (la.channels == 2) {
+    for (int i = 0; i < N; ++i) {
+      in[i][0] =
+          (double)((samples[2 * i] + samples[2 * i + 1]) * 0.5); // Average
+      in[i][1] = 0.0;
+    }
   }
-
   fftw_execute(p);
-  for (unsigned int i = 0; i < N/5; i++) {
+  for (unsigned int i = 0; i < N / 5; i++) {
     double freq = (double)i * la.sampleRate / (double)N;
     double re = out[i][0];
     double im = out[i][1];
-    printf("%f, %f\n", freq, 2 * sqrt(re*re + im*im) / N);
-  }    
+    printf("%f, %f\n", freq, 2 * sqrt(re * re + im * im) / N);
+  }
   fftw_destroy_plan(p);
   fftw_free(in);
-
 
   UnloadWaveSamples(samples);  
 }
