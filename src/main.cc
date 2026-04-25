@@ -6,6 +6,7 @@
 #include "fftw3.h"
 #include "app_mode.hh"
 
+#include "window_common.hh"
 #include "window_midi_editor.hh"
 #include "window_midi_player.hh"
 
@@ -56,6 +57,8 @@ int main(int argc, char* argv[])
     InitAudioDevice();
     SetTargetFPS(60);
 
+    load_common_gui_assets();
+
     initialize_midi_player();
 
     Sheet sheet = generate_full_piano_sheet();
@@ -94,6 +97,8 @@ int main(int argc, char* argv[])
 
         // UPDATE APP
     }
+
+    unload_common_gui_assets();
 
     unload_midi_player();
 

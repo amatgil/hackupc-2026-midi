@@ -1,9 +1,6 @@
 #include "window_midi_editor.hh"
-#include "GLFW/glfw3.h"
 #include "raygui.h"
-#include "raylib.h"
 #include "raymath.h"
-#include "sheet.hh"
 #include "utils.hh"
 #include <array>
 
@@ -147,8 +144,11 @@ void drawCursor() {
 }
 
 void drawGUI() {
-    int w = GetScreenWidth();
-    int h = GetScreenHeight();
+    float w = (float)GetScreenWidth();
+    float h = (float)GetScreenHeight();
+
+    DrawRectangle(0, 0, w, h * 0.1f, WHITE);
+    DrawRectangle(0, h - h * 0.05f, w, h * 0.05f, WHITE);
 }
 
 void drawSoundTimeline(Sheet &sheet) {
@@ -235,4 +235,6 @@ void drawSoundTimeline(Sheet &sheet) {
     }
 
     drawCursor();
+
+    drawGUI();
 }

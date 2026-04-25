@@ -7,7 +7,6 @@ float playing_time = 0.0f;
 int notes_count = 0;
 midi_player_note* notes = nullptr;
 
-Texture2D piano_texture;
 Texture2D background_texture_checkerboard;
 Texture2D background_gradient;
 
