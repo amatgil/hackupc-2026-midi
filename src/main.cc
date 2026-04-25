@@ -17,7 +17,12 @@
 #define SCREEN_HEIGHT 450
 
 void run_tests() {
-  parse_header_from_file();
+  //parse_header_from_file();
+  //test_FFT_samples();
+  //test_FFT_samples();
+  //test_variable_length_quantity();
+  //test_full_parse();
+  test_FFT_with_chunking_yay();
 }
 
 Sheet generate_full_piano_sheet()
@@ -61,7 +66,21 @@ int main(int argc, char* argv[])
 
     initialize_midi_player();
 
-    Sheet sheet = generate_full_piano_sheet();
+    //Sheet sheet = read_midi_file("../assets/testfiles/Op10No3Midi.mid", 120);
+    
+  Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
+  float *samples_interleaved = LoadWaveSamples(la);
+  float* samples = (float*)malloc(la.frameCount*sizeof(float));
+  int N = la.frameCount;
+  if (la.channels == 1) {
+    samples = samples_interleaved;
+  } else if (la.channels == 2) {
+    for (int i = 0; i < N; ++i) {
+      samples[i] = (double)((samples_interleaved[2 * i] + samples_interleaved[2 * i + 1]) * 0.5); // Average
+    }
+    free(samples_interleaved);
+  }
+  Sheet sheet = read_sheet_from_samples(samples, la.frameCount, la.sampleRate);
 
 
 	fftw_plan plan{};

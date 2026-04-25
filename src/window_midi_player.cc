@@ -43,6 +43,9 @@ void play_midi(const Sheet& sheet)
 		bool is_flat = flat_notes.find(sheet.pitch[i]) != flat_notes.end();
 		float width = (is_flat) ? 0.5f : 1.0f;
 		float height = (float)sheet.durations[i] * VERTICAL_SCALE;
+
+		printf("Pitch: %d\n",sheet.pitch[i]);
+
 		float x = pitch_to_position.at(sheet.pitch[i]) + ((is_flat) ? 0.25f : 0.0f);
 		float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height - INITIAL_DELAY * VERTICAL_SCALE;
 
@@ -170,7 +173,10 @@ void draw_midi_player_screen()
 
     for (int i = 0; i < notes_count; ++i)
     {
-        DrawRectangleV(notes[i].position, notes[i].size, (notes[i].is_flat) ? COLOR_NOTE_FLAT : COLOR_NOTE);
+		Vector2 inf = GetWorldToScreen2D({notes[i].position.x, notes[i].position.y + notes[i].size.y}, _cam);
+        if (inf.y < 0 |
+		    notes[i].position.y > 0) continue;
+		DrawRectangleV(notes[i].position, notes[i].size, (notes[i].is_flat) ? COLOR_NOTE_FLAT : COLOR_NOTE);
 	}
 
 	DrawLine(-26, 0, 26, 0, BLACK);
