@@ -39,3 +39,19 @@ void test_variable_length_quantity() {
   assert(res3 == 0x100000);
   assert(res4 == 0x200000);
 }
+
+void test_FFT_samples() {
+  // parse_header_from_file();
+  Wave la = LoadWave("../assets/samples/Mf A4.wav");
+  printf("Got wav\n");
+  float* samples = LoadWaveSamples(la);
+  int N = la.frameCount * la.channels;
+  printf("Got samples\n");
+  FFT(samples, N);
+
+  for (unsigned int i = 0; i < N; i++) {
+    printf("%i -> %f\n", i, samples[i]);
+  }    
+
+  UnloadWaveSamples(samples);  
+}

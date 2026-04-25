@@ -9,12 +9,14 @@
 
 #include "sheet.hh"
 #include "parsing.hh"
+#include "fft.hh"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 
 void run_tests() {
   parse_header_from_file();
+  test_FFT_samples();
   test_variable_length_quantity();
 }  
 

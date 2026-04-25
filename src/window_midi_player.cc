@@ -2,8 +2,12 @@
 
 Camera2D _cam = { 0 };
 
-Sheet playing_sheet;
 float playing_time = 0.0f;
+
+int notes_count = 0;
+midi_player_note* notes = nullptr;
+
+Texture2D piano_texture;
 
 void update_midi_playback(const float deltaTime)
 {
@@ -12,19 +16,56 @@ void update_midi_playback(const float deltaTime)
 
 void play_midi(const Sheet& sheet) 
 {
-	playing_sheet = sheet;
+    piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
+
 	playing_time = 0.0f;
+
+	notes_count = sheet.pitch.size();
+	if (notes != nullptr) free(notes);
+
+    notes = (midi_player_note*)malloc(sizeof(midi_player_note) * notes_count);
+	for (int i = 0; i < notes_count; ++i)
+    {
+        float width = 1.0f;
+        float height = (float)sheet.durations[i] * VERTICAL_SCALE;
+        float x = (float)sheet.pitch[i] - 26; // TODO: posar de -26 a 25  (Tecles blanques)
+        float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height;
+
+        notes[i].position = { x, y };
+        notes[i].size = { width, height };
+
+		printf("Note %d: position=(%f, %f), size=(%f, %f)\n", i, x, y, width, height);
+    }
 }
 
 void draw_midi_player_screen()
 {
-    _cam.target = { 0, 0 };
-    //_cam.offset = { width / 2.0f, height / 2.0f }; // Screen center
-    _cam.rotation = 0.0f;
-    //_cam.zoom = (float)height / MAP_COORD_SIZE;
+	_cam.target = { 0, -playing_time * VERTICAL_SCALE };
+	_cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+	_cam.rotation = 0.0f;
+	_cam.zoom = (float)GetScreenWidth() / 52.0f;
 
     BeginMode2D(_cam);
     ClearBackground(COLOR_BACKGROUND);
 
+    for (int i = 0; i < notes_count; ++i)
+    {
+        DrawRectangleV(notes[i].position, notes[i].size, COLOR_NOTE);
+	}
+
     EndMode2D();
+
+	Rectangle dest = { 0, GetScreenHeight() * (1.0f-PIANO_VERTICAL_WINDOW_PROPORTION), (float)GetScreenWidth(), GetScreenHeight() * PIANO_VERTICAL_WINDOW_PROPORTION };
+	Vector2 origin = { 1.0f / 2.0f, 1.0f / 2.0f };
+
+	DrawTexturePro
+	(piano_texture,
+		{
+			0,
+			0,
+			2844,
+			350
+		},
+		dest, origin, 0, WHITE
+	);
 }
