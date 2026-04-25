@@ -13,7 +13,6 @@ void parse_header_from_file() {
   }
   
   Header h = parse_header(s, 12);
-  printf("Parsed\n");
   assert(h.length == 6);
   assert(h.format == 1);
   assert(h.num_tracks == 2);
