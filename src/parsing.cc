@@ -1,15 +1,25 @@
 #include "parsing.hh"
+#include "assert.h"
 
 Sheet *parse_midi(char *text, unsigned int text_length) {
-  
+  // TODO
+  return NULL;
 }
 
 Header parse_headers(char* text, unsigned int text_length) {
-  int i = 0;
+  // TODO: De moment assumim que el fitxer és prou gran. Potser
+  // no és el cas i tenim UB
+
+  if (text[0] != 'M' || text[1] != 'T' ||
+      text[2] != 'h' || text[3] != 'd') {
+    assert(0); // TODO: Retorna un error de manera millor
+  }
   return (Header) {
+    .length = read_big_endian_4_bytes(text + 4),
+    .format = read_big_endian_2_bytes(text + 4 + 4),
+    .num_tracks = read_big_endian_2_bytes(text + 4 + 4 + 2),
+    .division = read_big_endian_2_bytes(text + 4 + 4 + 2 + 2)
   };
-  uint32_t l = read_big_endian_4_bytes(text);
-  
 }
 
 uint32_t read_big_endian_4_bytes(char *text) {
