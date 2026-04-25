@@ -28,7 +28,7 @@ void play_midi(const Sheet& sheet)
     {
         float width = 1.0f;
         float height = (float)sheet.durations[i] * VERTICAL_SCALE;
-        float x = (float)sheet.pitch[i] - 44; // TODO: posar de -44 a 43
+        float x = (float)sheet.pitch[i] - 26; // TODO: posar de -26 a 25  (Tecles blanques)
         float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height;
 
         notes[i].position = { x, y };
@@ -43,7 +43,7 @@ void draw_midi_player_screen()
 	_cam.target = { 0, -playing_time * VERTICAL_SCALE };
 	_cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 	_cam.rotation = 0.0f;
-	_cam.zoom = (float)GetScreenWidth() / 88.0f;
+	_cam.zoom = (float)GetScreenWidth() / 52.0f;
 
     BeginMode2D(_cam);
     ClearBackground(COLOR_BACKGROUND);
@@ -63,8 +63,8 @@ void draw_midi_player_screen()
 		{
 			0,
 			0,
-			900,
-			450
+			2844,
+			350
 		},
 		dest, origin, 0, WHITE
 	);
