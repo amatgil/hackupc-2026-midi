@@ -107,7 +107,7 @@ void test_FFT_with_chunking_yay() {
     free(samples_interleaved);
   }
 
-  float* pitches = which_pitch_is_playing_at_each_time_instance(samples, la.frameCount, la.sampleRate);
+  double* pitches = which_pitch_is_playing_at_each_time_instance(samples, la.frameCount, la.sampleRate);
   for (int i = 0; i < la.frameCount / FFT_CHUNK_SIZE; ++i) {
     printf("%i %f\n", i, pitches[i]);
   }

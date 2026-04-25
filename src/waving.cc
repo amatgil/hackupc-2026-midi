@@ -1,6 +1,7 @@
 #include "waving.hh"
 #include "fftw3.h"
 #include <cstdint>
+#include <cstdio>
 
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length,
@@ -49,10 +50,10 @@ float* extreu_fft_from_wav(Wave* la) {
 }
 
 // La mida de retorn és sample_length / FFT_CHUNK_SIZE
-float *which_pitch_is_playing_at_each_time_instance(float *samples,
+double *which_pitch_is_playing_at_each_time_instance(float *samples,
                                                     size_t sample_length,
                                                     float sampleRate) {
-  float* ret = (float*)malloc(sample_length / FFT_CHUNK_SIZE * sizeof(float));
+  double* ret = (double*)malloc(sample_length / FFT_CHUNK_SIZE * sizeof(double));
   for (int i = 0; i < sample_length / FFT_CHUNK_SIZE; i++) {
     // TODO: Pass in memory (from this stack) instead of mallocing five quadspillion times
     float* chunk_de_samples = samples + FFT_CHUNK_SIZE*i;
@@ -61,8 +62,14 @@ float *which_pitch_is_playing_at_each_time_instance(float *samples,
     float max_freq = -1;
     float max_freq_amplitude = -1;
 
-    for (int j = 0; j < FFT_CHUNK_SIZE; ++j) {
-      double freq = (double)j * sampleRate / (double)FFT_CHUNK_SIZE;
+  /*   for (int j = 0; j < FFT_CHUNK_SIZE/2; j++) {
+        double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
+        printf("%f, %f\n", freq, fft_of_chunk[j]);
+    } */
+
+
+    for (int j = 0; j < FFT_CHUNK_SIZE/2; ++j) {
+      double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
       if (fft_of_chunk[j] > max_freq_amplitude) {
         max_freq_amplitude = fft_of_chunk[j];
         max_freq = freq;
