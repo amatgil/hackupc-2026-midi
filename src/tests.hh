@@ -100,12 +100,12 @@ void test_full_parse() {
   assert(fptr != NULL);
   unsigned int i = 0, c;
   unsigned char* s = (unsigned char*)malloc(10000);
-  
+
   while ((c = fgetc(fptr)) != EOF) {
     s[i] = c;
     i++;
   }
-  
+
   Sheet sheet = parse_midi(s, i, 120);
   printvector(sheet.timestamps_start);
   printvector(sheet.durations);
@@ -121,10 +121,9 @@ void test_FFT_samples_calling() {
     double freq = (double)i * la.sampleRate / (double)N;
     printf("%f %f\n", freq, ret[i]);
 
-  }    
+  }
 }*/
 
-/*
 void test_FFT_with_chunking_yay() {
   Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
   assert(la.channels == 1 || la.channels == 2);
@@ -151,4 +150,4 @@ void test_FFT_with_chunking_yay() {
   free(samples);
 
   UnloadWave(la);
-}*/
+}
