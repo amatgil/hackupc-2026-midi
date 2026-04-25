@@ -118,6 +118,7 @@ const unordered_map<unsigned int, float> pitch_to_position = {
 typedef struct {
 	Vector2 position;
 	Vector2 size;
+	int pitch;
 	bool played;
 } midi_player_note;
 
