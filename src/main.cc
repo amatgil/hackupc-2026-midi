@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 
     initialize_midi_player();
 
-    Sheet sheet = generate_full_piano_sheet();
+    Sheet sheet = read_midi_file("../assets/testfiles/moonlight.mid", 120);
 
 
 	fftw_plan plan{};

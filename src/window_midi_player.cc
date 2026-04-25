@@ -178,7 +178,9 @@ void draw_midi_player_screen()
 
     for (int i = 0; i < notes_count; ++i)
     {
-        DrawRectangleV(notes[i].position, notes[i].size, (notes[i].is_flat) ? COLOR_NOTE_FLAT : COLOR_NOTE);
+		Vector2 p = GetWorldToScreen2D(notes[i].position, _cam);
+        if (p.y - notes[i].size.y < 0 | p.y - notes[i].size.y > GetScreenHeight()) continue;
+		DrawRectangleV(notes[i].position, notes[i].size, (notes[i].is_flat) ? COLOR_NOTE_FLAT : COLOR_NOTE);
 	}
 
 	DrawLine(-26, 0, 26, 0, GREEN);

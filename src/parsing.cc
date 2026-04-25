@@ -6,7 +6,7 @@
 
 // Don't forget to free the Sheet when you're done
 // https://ccrma.stanford.edu/~craig/14q/midifile/MidiFileFormat.html#track_event
-Sheet parse_midi(unsigned char *text, unsigned int text_length) {
+Sheet parse_midi(unsigned char *text, unsigned int text_length, float BPM) {
   Header h = parse_header(text, text_length);
   int longitud_llegida;
   Sheet s;
@@ -15,6 +15,12 @@ Sheet parse_midi(unsigned char *text, unsigned int text_length) {
   while(text < text_end) {
     parse_track_chunk(text, text_length, longitud_llegida, s);
     text += longitud_llegida;
+  }
+  
+  s.total_duration /= (h.division*BPM/60.0f);
+  for (int i = 0; i < s.durations.size(); ++i) {
+    s.timestamps_start[i] /= (h.division*BPM/60.0f);
+    s.durations[i] /= (h.division*BPM/60.0f);
   }
   return s;
 }
@@ -198,26 +204,18 @@ uint16_t read_big_endian_2_bytes(unsigned char *text) {
   return data;
 }*/
 
-void printvector(const vector<float>& v) {
-  for (auto x: v) {
-    printf("%f, ", x);
-  }
-  printf("\n");
-}
-void printvector(const vector<unsigned int>& v) {
-  for (auto x: v) {
-    printf("%d, ", x);
-  }
-  printf("\n");
-}
 
-int main() {
+
+Sheet read_midi_file(char* file, float BPM) {
   printf("Testing parse del header del fitxer simple \n");
-  FILE* fptr = fopen("../assets/testfiles/moonlight.mid", "r");
+  
+  FILE* fptr = fopen(file, "r");
   assert(fptr != NULL);
+  
   unsigned int i = 0, c;
   fseek(fptr, 0L, SEEK_END);
   unsigned int sz = ftell(fptr);
+  
   unsigned char* s = (unsigned char*) malloc(sz);
   rewind(fptr);
   printf("Size: %d\n", sz);
@@ -226,9 +224,5 @@ int main() {
     i++;
   }
   
-  Sheet sheet = parse_midi(s, i);
-  printvector(sheet.timestamps_start);
-  printvector(sheet.durations);
-  printvector(sheet.attack_velocities);
-  printvector(sheet.pitch);
+  return parse_midi(s, i, BPM);
 }

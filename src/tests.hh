@@ -104,7 +104,7 @@ void test_full_parse() {
     i++;
   }
   
-  Sheet sheet = parse_midi(s, i);
+  Sheet sheet = parse_midi(s, i, 120);
   printvector(sheet.timestamps_start);
   printvector(sheet.durations);
   printvector(sheet.attack_velocities);
