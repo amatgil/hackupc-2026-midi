@@ -4,8 +4,7 @@
 
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length,
-                               float sampleRate
-                                   ) {
+                               float sampleRate) {
   int N = sample_length;
   fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
   fftw_complex *out = in; // in-place
@@ -14,11 +13,11 @@ float *extreu_fft_from_samples(float *samples, size_t sample_length,
   for (int i = 0; i < N; ++i) {
     in[i][0] = samples[i];
     in[i][1] = 0.0;
-  }    
+  }
 
   fftw_execute(p);
 
-  float* ret = (float*)malloc(N * sizeof(float));  
+  float* ret = (float*)malloc(N * sizeof(float));
   for (unsigned int i = 0; i < N / 2; i++) {
     double re = out[i][0];
     double im = out[i][1];
@@ -27,8 +26,8 @@ float *extreu_fft_from_samples(float *samples, size_t sample_length,
   fftw_destroy_plan(p);
   fftw_free(in);
 
-  return ret;  
-}  
+  return ret;
+}
 
 // Per passar de i a frequencia:
 // double freq = (double)i * la.sampleRate / (double)N;
@@ -53,7 +52,7 @@ float* extreu_fft_from_wav(Wave* la) {
 float *which_pitch_is_playing_at_each_time_instance(float *samples,
                                                     size_t sample_length,
                                                     float sampleRate) {
-  float* ret = (float*)malloc(sample_length / FFT_CHUNK_SIZE * sizeof(uint8_t));
+  float* ret = (float*)malloc(sample_length / FFT_CHUNK_SIZE * sizeof(float));
   for (int i = 0; i < sample_length / FFT_CHUNK_SIZE; i++) {
     // TODO: Pass in memory (from this stack) instead of mallocing five quadspillion times
     float* chunk_de_samples = samples + FFT_CHUNK_SIZE*i;
@@ -69,6 +68,8 @@ float *which_pitch_is_playing_at_each_time_instance(float *samples,
         max_freq = freq;
       }
     }
+
+    free(fft_of_chunk);
 
     ret[i] = max_freq;
   }
