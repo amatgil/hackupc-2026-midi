@@ -33,7 +33,7 @@ URL https://www.fftw.org/fftw-3.3.11.tar.gz
 FetchContent_MakeAvailable(fftw)
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC})
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC src)
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC src ${fftw3_SOURCE_DIR}/api)
 target_link_libraries(${CMAKE_PROJECT_NAME} "raylib;fftw3")
 
 file(CREATE_LINK ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/shaders SYMBOLIC)
