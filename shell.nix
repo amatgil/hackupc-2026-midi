@@ -27,6 +27,7 @@ let
     pkg-config
 
     raylib
+    glfw
   ];
 in
 pkgs.mkShell {
