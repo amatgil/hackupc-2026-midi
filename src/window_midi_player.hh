@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <stdio.h>
+#include <cmath>
 
 #include "raylib.h"
 #include "sheet.hh"
@@ -16,6 +17,11 @@
 #define PIANO_VERTICAL_WINDOW_PROPORTION 1.0f/5.0f
 
 #define INITIAL_DELAY 0.0f
+
+#define BACKGROUND_ROTATION -15.0f
+#define BACKGROUND_SPEED 5.0f
+#define BACKGROUND_TEXTURE_SIZE 960.0f
+#define BACKGROUND_SCALE 1.0f
 
 typedef struct {
 	Vector2 position;

@@ -8,10 +8,15 @@ int notes_count = 0;
 midi_player_note* notes = nullptr;
 
 Texture2D piano_texture;
+Texture2D background_texture_checkerboard;
+
+float background_texture_x = 0.0f;
+float background_texture_y = 0.0f;
 
 void initialize_midi_player()
 {
 	piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
+	background_texture_checkerboard = LoadTexture("../assets/ui/UI_MidiPlayer_Background_Checkerboard.png");
 
 	load_note_sounds();
 }
@@ -19,6 +24,7 @@ void initialize_midi_player()
 void unload_midi_player()
 {
 	UnloadTexture(piano_texture);
+	UnloadTexture(background_texture_checkerboard);
 
 	unload_note_sounds();
 
@@ -51,16 +57,28 @@ void update_midi_playback(const float deltaTime)
 {
 	playing_time += deltaTime;
 
+	float texW = BACKGROUND_TEXTURE_SIZE * BACKGROUND_SCALE;
+	float texH = BACKGROUND_TEXTURE_SIZE * BACKGROUND_SCALE;
+
+	background_texture_x -= deltaTime * BACKGROUND_SPEED * cos(BACKGROUND_ROTATION * DEG2RAD);
+	background_texture_y += deltaTime * BACKGROUND_SPEED * sin(BACKGROUND_ROTATION * DEG2RAD);
+
+	background_texture_x = fmod(background_texture_x, texW);
+	if (background_texture_x < 0) background_texture_x += texW;
+
+	background_texture_y = fmod(background_texture_y, texH);
+	if (background_texture_y < 0) background_texture_y += texH;
+
 	for (int i = 0; i < notes_count; ++i)
 	{
 		notes[i].position.y += VERTICAL_SCALE * deltaTime;
 		if (notes[i].position.y >= 0)
 		{
-			printf("Playing note %d at time %f seconds\n", i, playing_time);
+			//printf("Playing note %d at time %f seconds\n", i, playing_time);
 			// Here you can add code to play the sound associated with the note
 			// For example, you could use PlaySound() from raylib to play a sound file
 			// PlaySound(note_sound);
-			notes[i].position.y = 0; // Keep the note at the piano level
+			//notes[i].position.y = 0; // Keep the note at the piano level
 		}
 	}
 }
@@ -82,9 +100,55 @@ void draw_piano()
 	);
 }
 
+void draw_background()
+{
+	float texW = background_texture_checkerboard.width * BACKGROUND_SCALE;
+	float texH = background_texture_checkerboard.height * BACKGROUND_SCALE;
+
+	float angle = BACKGROUND_ROTATION * DEG2RAD;
+	float cosA = cos(angle);
+	float sinA = sin(angle);
+
+	Vector2 screenCenter = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+
+	for (int x = -6; x <= 6; x++)
+	{
+		for (int y = -6; y <= 6; y++)
+		{
+			float localX = x * texW - background_texture_x;
+			float localY = y * texH - background_texture_y;
+
+			float rotX = localX * cosA - localY * sinA;
+			float rotY = localX * sinA + localY * cosA;
+
+			Vector2 pos = { screenCenter.x + rotX, screenCenter.y + rotY };
+
+			Rectangle dest = {
+				pos.x,
+				pos.y,
+				texW,
+				texH
+			};
+
+			Vector2 origin = { texW / 2.0f, texH / 2.0f };
+
+			DrawTexturePro(
+				background_texture_checkerboard,
+				{ 0, 0, (float)background_texture_checkerboard.width, (float)background_texture_checkerboard.height },
+				dest,
+				origin,
+				BACKGROUND_ROTATION,
+				COLOR_BACKGROUND
+			);
+		}
+	}
+}
+
 void draw_midi_player_screen()
 {
     ClearBackground(COLOR_BACKGROUND);
+
+	draw_background();
 
 	draw_piano();
 
