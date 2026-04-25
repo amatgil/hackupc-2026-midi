@@ -1,11 +1,14 @@
 #pragma once
 #include "complex.h"
+#include "sheet.hh"
 #include "fftw3.h"
 #include "assert.h"
 #include "raylib.h"
 
 // Per tal que, per cada segon, a 44100Hz, n'hi hagui approx 20
-#define FFT_CHUNK_SIZE 2048 
+#define FFT_CHUNK_SIZE 2048
+// Half of root(2; 12)
+#define MAX_FREQ_RATIO_THRESHOLD 1.03
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length, float sampleRate);
 
@@ -13,6 +16,12 @@ float *extreu_fft_from_samples(float *samples, size_t sample_length, float sampl
 // double freq = (double)i * la.sampleRate / (double)N;
 float* extreu_fft_from_wav(Wave* la);
 
-float *which_pitch_is_playing_at_each_time_instance(float *samples,
+double *which_pitch_is_playing_at_each_time_instance(float *samples,
                                                     size_t sample_length,
                                                     float sampleRate);
+
+Sheet pitches_to_sheet(float *pitches, size_t number_pitches, float sampleRate,
+                       float timestamp_start);
+
+Sheet read_sheet_from_samples(float *samples, size_t sample_length,
+                              float sampleRate);

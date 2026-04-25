@@ -7,9 +7,7 @@ float playing_time = 0.0f;
 int notes_count = 0;
 midi_player_note* notes = nullptr;
 
-Texture2D piano_texture;
 Texture2D background_texture_checkerboard;
-Texture2D background_gradient;
 
 float background_texture_x = 0.0f;
 float background_texture_y = 0.0f;
@@ -42,18 +40,22 @@ void play_midi(const Sheet& sheet)
 	notes = (midi_player_note*)malloc(sizeof(midi_player_note) * notes_count);
 	for (int i = 0; i < notes_count; ++i)
 	{
-		bool is_flat = flat_notes.find(sheet.pitch[i]) != flat_notes.end();
+		int pitch_adjusted = sheet.pitch[i];
+		if (pitch_adjusted > 87) pitch_adjusted = 87;
+		if (pitch_adjusted < 0) pitch_adjusted = 0;
+
+		bool is_flat = flat_notes.find(pitch_adjusted) != flat_notes.end();
 		float width = (is_flat) ? 0.5f : 1.0f;
 		float height = (float)sheet.durations[i] * VERTICAL_SCALE;
 
-		printf("Pitch: %d\n",sheet.pitch[i]);
+		printf("Pitch: %d\n", pitch_adjusted);
 
-		float x = pitch_to_position.at(sheet.pitch[i]) + ((is_flat) ? 0.25f : 0.0f);
+		float x = pitch_to_position.at(pitch_adjusted) + ((is_flat) ? 0.25f : 0.0f);
 		float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height - INITIAL_DELAY * VERTICAL_SCALE;
 
 		notes[i].position = { x, y };
 		notes[i].size = { width, height };
-		notes[i].pitch = sheet.pitch[i];
+		notes[i].pitch = pitch_adjusted;
 		notes[i].played = false;
 		notes[i].is_flat = is_flat;
 
@@ -84,6 +86,11 @@ void update_midi_playback(const float deltaTime)
 		{
 			notes[i].played = true;
 			play_note_sound((unsigned int)notes[i].pitch, 2);
+		}
+
+		if (notes[i].position.y >= notes[i].size.y)
+		{
+			stop_note_sound((unsigned int)notes[i].pitch);
 		}
 	}
 }
@@ -149,23 +156,12 @@ void draw_background()
 	}
 }
 
-void draw_background_gradient()
-{
-	DrawTexturePro(background_gradient,
-		{ 0, 0, (float)200, (float)200 },
-		{ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() },
-		{ 0, 0 },
-		0,
-		WHITE
-	);
-}
-
 void draw_midi_player_screen()
 {
     ClearBackground(COLOR_BACKGROUND);
 
 	draw_background();
-	draw_background_gradient();
+	draw_background_gradient(WHITE);
 
 	draw_piano();
 
@@ -187,7 +183,7 @@ void draw_midi_player_screen()
 		DrawRectangleV(notes[i].position, notes[i].size, (notes[i].is_flat) ? COLOR_NOTE_FLAT : COLOR_NOTE);
 	}
 
-	DrawLine(-26, 0, 26, 0, GREEN);
+	DrawLine(-26, 0, 26, 0, BLACK);
 
     EndMode2D();
 }

@@ -1,6 +1,8 @@
 #include "waving.hh"
+#include "sheet.hh"
 #include "fftw3.h"
 #include <cstdint>
+#include <cstdio>
 
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length,
@@ -49,10 +51,10 @@ float* extreu_fft_from_wav(Wave* la) {
 }
 
 // La mida de retorn és sample_length / FFT_CHUNK_SIZE
-float *which_pitch_is_playing_at_each_time_instance(float *samples,
+double *which_pitch_is_playing_at_each_time_instance(float *samples,
                                                     size_t sample_length,
                                                     float sampleRate) {
-  float* ret = (float*)malloc(sample_length / FFT_CHUNK_SIZE * sizeof(float));
+  double* ret = (double*)malloc(sample_length / FFT_CHUNK_SIZE * sizeof(double));
   for (int i = 0; i < sample_length / FFT_CHUNK_SIZE; i++) {
     // TODO: Pass in memory (from this stack) instead of mallocing five quadspillion times
     float* chunk_de_samples = samples + FFT_CHUNK_SIZE*i;
@@ -61,8 +63,8 @@ float *which_pitch_is_playing_at_each_time_instance(float *samples,
     float max_freq = -1;
     float max_freq_amplitude = -1;
 
-    for (int j = 0; j < FFT_CHUNK_SIZE; ++j) {
-      double freq = (double)j * sampleRate / (double)FFT_CHUNK_SIZE;
+    for (int j = 0; j < FFT_CHUNK_SIZE/2; ++j) {
+      double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
       if (fft_of_chunk[j] > max_freq_amplitude) {
         max_freq_amplitude = fft_of_chunk[j];
         max_freq = freq;
@@ -73,5 +75,77 @@ float *which_pitch_is_playing_at_each_time_instance(float *samples,
 
     ret[i] = max_freq;
   }
+  return ret;
+}
+
+unsigned int frequency_to_pitch(float freq) {
+  // doubling here -> adding 12 there
+  // 440Hz -> 48
+
+  float logarithm = log(freq/440) / log(2);
+  return 12 * logarithm + 48;
+}
+
+void add_note_to_sheet(Sheet *s, float offset, unsigned int& past_note_start_i,
+                       float sampleRate, unsigned int i,
+                       float past_note_frequency) {
+  s->timestamps_start.push_back(offset +
+                               past_note_start_i * FFT_CHUNK_SIZE / sampleRate);
+  s->durations.push_back((i - past_note_start_i) * FFT_CHUNK_SIZE / sampleRate);
+  s->pitch.push_back(frequency_to_pitch(past_note_frequency));
+  s->attack_velocities.push_back(0); // No s'utilitza
+  past_note_start_i = i;
+}
+
+// Always >= 1
+float ratio_between(float a, float b) {
+  return max(a, b) / min(a, b);
+}
+
+// Takes samples at sample_rate and return Sheet
+Sheet pitches_to_sheet(double *pitches, size_t number_pitches, float sampleRate,
+                       float offset) {
+  Sheet s;
+  double past_note_frequency = 0; // Notes below 25Hz do not exist
+  unsigned int past_note_start_i = 0;
+
+  for (unsigned int i = 0; i < number_pitches-1; ++i) {
+    if (pitches[i] < 25 && past_note_frequency > 25) {
+      add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, i, past_note_frequency);
+      past_note_frequency = 0;
+    }
+    else if (pitches[i] > 25 && past_note_frequency > 25) {
+      if (ratio_between(pitches[i], past_note_frequency) >
+          MAX_FREQ_RATIO_THRESHOLD) {
+        add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, i,
+                          past_note_frequency);
+        past_note_frequency = pitches[i];
+      } else {
+        past_note_frequency += pitches[i] / (i - past_note_start_i) -
+                               past_note_frequency / (i-past_note_start_i+1);
+      }
+
+    }
+    else if (pitches[i] < 25 && past_note_frequency < 25) {
+      // No tenim cap nota, estem en silenci, cap problema
+    }
+    else if (pitches[i] > 25 && past_note_frequency < 25) {
+      past_note_start_i = i;
+      past_note_frequency = pitches[i];
+    }
+
+  }
+  return s;
+}
+
+Sheet read_sheet_from_samples(float *samples, size_t sample_length,
+                          float sampleRate) {
+
+  double *pitches_per_time =
+      which_pitch_is_playing_at_each_time_instance(samples, sample_length,
+                                                   sampleRate);
+
+  Sheet ret = pitches_to_sheet(pitches_per_time, sample_length / FFT_CHUNK_SIZE, sampleRate, 0.0);
+  free(pitches_per_time);
   return ret;
 }
