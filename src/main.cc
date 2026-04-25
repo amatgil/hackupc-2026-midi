@@ -15,7 +15,7 @@
 
 void run_tests() {
   parse_header_from_file();
-}  
+}
 
 int main(int argc, char* argv[])
 {
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
       run_tests();
       return 0;
   }
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE);   
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   if (argc == 3) {
     int wdth = atoi(argv[1]);
     int hght = atoi(argv[2]);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 
     initialize_midi_player();
 
-    Sheet sheet = 
+    Sheet sheet =
     {
         {0,1,2,3,4}, // timestamps_start
         {1,1,1,1,1}, // durations
@@ -49,13 +49,15 @@ int main(int argc, char* argv[])
     };
 	play_midi(sheet);
 
+	initEditor();
+
     float deltaTime = 0;
     while (!WindowShouldClose())
     {
         deltaTime = GetFrameTime();
 
         BeginDrawing();
-        
+
 		update_midi_playback(deltaTime);
         draw_midi_player_screen();
 
@@ -73,5 +75,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
-
