@@ -7,7 +7,6 @@
 // Don't forget to free the Sheet when you're done
 // https://ccrma.stanford.edu/~craig/14q/midifile/MidiFileFormat.html#track_event
 Sheet parse_midi(unsigned char *text, unsigned int text_length) {
-  // TODO
   Header h = parse_header(text, text_length);
   int longitud_llegida;
   Sheet s;
