@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <stdio.h>
 #include "raylib.h"
 
@@ -6,7 +7,7 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
     if (argc == 3)
     {
@@ -37,4 +38,4 @@ int main(int argc, char* argv[])
     CloseWindow();
 
     return 0;
-}  
+}

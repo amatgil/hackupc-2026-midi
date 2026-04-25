@@ -1,2 +1,4 @@
 /src/*.x
 /.direnv/
+
+build/
