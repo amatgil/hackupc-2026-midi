@@ -12,6 +12,7 @@
 #define COLOR_NOTE_FLAT (Color){ 176, 16, 202, 255 }
 
 inline Texture2D piano_texture;
+inline Texture2D piano_texture_vertical;
 
 const std::unordered_map<unsigned int, float> pitch_to_position = {
 	{ 0, -26 },

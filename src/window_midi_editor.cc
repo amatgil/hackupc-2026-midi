@@ -1,8 +1,10 @@
 #include "window_midi_editor.hh"
-#include "raygui.h"
 #include "raymath.h"
 #include "utils.hh"
 #include <array>
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
 enum Tools {
     Move = 0,
@@ -149,6 +151,32 @@ void drawGUI() {
 
     DrawRectangle(0, 0, w, h * 0.1f, WHITE);
     DrawRectangle(0, h - h * 0.05f, w, h * 0.05f, WHITE);
+
+    // Square button
+	float button_height = h * 0.075f;
+	float button_width = button_height;
+
+	if (GuiButton((Rectangle) { 0.0125f * w, 0.0125f * h, button_width, button_height }, "PIANO")) tool = Create;
+	if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) tool = Create;
+	if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) tool = Create;
+
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) tool = Create;
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height }, "DELETE")) tool = Delete;
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.5f * w, 0.0125f * h, button_width, button_height }, "MOVE")) tool = Move;
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height }, "SPLIT")) tool = Split;
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height }, "VOLUME")) tool = Volume;
+
+	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) tool = Create;
+	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) tool = Create;
+
+    DrawTexturePro(
+        piano_texture_vertical,
+        { 0, 0, (float)120, (float)2644 },
+        { 0, h * 0.1f, w * 0.15f, h * 0.85f },
+        { 0, 0 },
+        0,
+        WHITE
+	);
 }
 
 void drawSoundTimeline(Sheet &sheet) {
