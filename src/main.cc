@@ -9,12 +9,21 @@
 
 #include "sheet.hh"
 #include "parsing.hh"
+#include "fft.hh"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 
 void run_tests() {
-  parse_header_from_file();
+  // parse_header_from_file();
+  Wave la = LoadWave("../assets/samples/Mf A4.wav");
+  float* samples = LoadWaveSamples(la);
+  FFT(samples, la.frameCount * la.channels, 1);
+  for (unsigned int i = 0; i < la.frameCount * la.channels; i++) {
+    printf("%i -> %f\n", i, samples[i]);
+  }    
+
+  UnloadWaveSamples(samples);  
 }  
 
 int main(int argc, char* argv[])
