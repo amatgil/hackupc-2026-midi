@@ -52,4 +52,4 @@ Header parse_header(unsigned char* text, unsigned int text_length);
 
 uint32_t read_big_endian_4_bytes(unsigned char *text);
 uint16_t read_big_endian_2_bytes(unsigned char *text);
-uint64_t read_variable_length_quantity(unsigned char *text);
+uint64_t read_variable_length_quantity(unsigned char *text, unsigned int& size);

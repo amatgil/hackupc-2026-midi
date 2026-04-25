@@ -1,4 +1,5 @@
 #include "parsing.hh"
+#include "fft.hh"
 #include <stdlib.h>
 
 void parse_header_from_file() {
@@ -26,11 +27,11 @@ void test_variable_length_quantity() {
   unsigned char val2[2] = {0xC0, 0x00};
   unsigned char val3[3] = {0xC0, 0x80, 0x00};
   unsigned char val4[4] = {0x81, 0x80, 0x80};
-  
-  uint64_t res1 = read_variable_length_quantity(val1);
-  uint64_t res2 = read_variable_length_quantity(val2);
-  uint64_t res3 = read_variable_length_quantity(val3);
-  uint64_t res4 = read_variable_length_quantity(val4);
+  unsigned int x;
+  uint64_t res1 = read_variable_length_quantity(val1, x);
+  uint64_t res2 = read_variable_length_quantity(val2, x);
+  uint64_t res3 = read_variable_length_quantity(val3, x);
+  uint64_t res4 = read_variable_length_quantity(val4, x);
 
   printf("%lx, %lx, %lx, %lx\n", res1, res2, res3, res4);
 
