@@ -29,3 +29,6 @@ endif()
 add_executable(${CMAKE_PROJECT_NAME} ${SRC})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC src)
 target_link_libraries(${CMAKE_PROJECT_NAME} raylib)
+
+file(CREATE_LINK ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/shaders SYMBOLIC)
+file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/assets SYMBOLIC)
