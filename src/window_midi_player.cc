@@ -18,6 +18,7 @@ void initialize_midi_player()
 {
 	piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
 	background_texture_checkerboard = LoadTexture("../assets/ui/UI_MidiPlayer_Background_Checkerboard.png");
+	background_gradient = LoadTexture("../assets/ui/UI_MidiPlayer_Background_Gradient.png");
 
 	load_note_sounds();
 }
@@ -26,6 +27,7 @@ void unload_midi_player()
 {
 	UnloadTexture(piano_texture);
 	UnloadTexture(background_texture_checkerboard);
+	UnloadTexture(background_gradient);
 
 	unload_note_sounds();
 
@@ -81,6 +83,11 @@ void update_midi_playback(const float deltaTime)
 		{
 			notes[i].played = true;
 			play_note_sound((unsigned int)notes[i].pitch, 2);
+		}
+
+		if (notes[i].position.y >= notes[i].size.y)
+		{
+			stop_note_sound((unsigned int)notes[i].pitch);
 		}
 	}
 }
