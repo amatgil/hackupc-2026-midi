@@ -3,6 +3,7 @@
 #include "raylib.h"
 
 #include "window_midi_editor.hh"
+#include "window_midi_player.hh"
 
 #include "sheet.hh"
 
@@ -37,9 +38,9 @@ int main(int argc, char* argv[])
 
         BeginDrawing();
 
-        draw_midi_player_screen(sheet);
+        draw_midi_player_screen();
 
-        drawSoundTimeline(sheet);
+        //drawSoundTimeline();
 
 
         EndDrawing();
