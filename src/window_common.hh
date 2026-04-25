@@ -113,4 +113,6 @@ const std::unordered_set<int> flat_notes =
 void load_common_gui_assets();
 void unload_common_gui_assets();
 
+void draw_background_gradient();
+
 #endif

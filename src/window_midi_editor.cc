@@ -169,6 +169,15 @@ void drawGUI() {
 	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) tool = Create;
 	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) tool = Create;
 
+    float sliderValue = 50.0f;
+    GuiSlider((Rectangle) { 0.0125f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
+    , "10\%"
+        , " 100\%"
+        , &sliderValue
+        , 10
+        , 100
+        );
+
     DrawTexturePro(
         piano_texture_vertical,
         { 0, 0, (float)120, (float)2644 },
@@ -187,18 +196,13 @@ void drawSoundTimeline(Sheet &sheet) {
     else
         xscroll_offset += GetMouseWheelMove() * 30;
 
-    if (xscroll_offset > 0)
-        xscroll_offset = 0;
-    if (yscroll_offset < 0)
-        yscroll_offset = 0;
-    if (yscroll_offset > 87)
-        yscroll_offset = 87;
-
     ClearBackground(COLOR_BACKGROUND);
     if (xscroll_offset > 0)
         BeginScissorMode(xscroll_offset, 0, w, h);
     ClearBackground(COLOR_BACKGROUND);
     EndScissorMode();
+
+    draw_background_gradient();
 
     drawGrid(xscroll_offset, yscroll_offset, pixels_per_second, row_width);
 
@@ -262,7 +266,7 @@ void drawSoundTimeline(Sheet &sheet) {
         tool = Volume;
     }
 
-    drawCursor();
-
     drawGUI();
+
+    drawCursor();
 }

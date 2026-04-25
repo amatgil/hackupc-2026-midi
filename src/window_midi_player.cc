@@ -8,7 +8,6 @@ int notes_count = 0;
 midi_player_note* notes = nullptr;
 
 Texture2D background_texture_checkerboard;
-Texture2D background_gradient;
 
 float background_texture_x = 0.0f;
 float background_texture_y = 0.0f;
@@ -17,7 +16,6 @@ void initialize_midi_player()
 {
 	piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
 	background_texture_checkerboard = LoadTexture("../assets/ui/UI_MidiPlayer_Background_Checkerboard.png");
-	background_gradient = LoadTexture("../assets/ui/UI_MidiPlayer_Background_Gradient.png");
 
 	load_note_sounds();
 }
@@ -26,7 +24,6 @@ void unload_midi_player()
 {
 	UnloadTexture(piano_texture);
 	UnloadTexture(background_texture_checkerboard);
-	UnloadTexture(background_gradient);
 
 	unload_note_sounds();
 
@@ -150,17 +147,6 @@ void draw_background()
 			);
 		}
 	}
-}
-
-void draw_background_gradient()
-{
-	DrawTexturePro(background_gradient,
-		{ 0, 0, (float)200, (float)200 },
-		{ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() },
-		{ 0, 0 },
-		0,
-		WHITE
-	);
 }
 
 void draw_midi_player_screen()
