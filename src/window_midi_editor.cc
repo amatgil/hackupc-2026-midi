@@ -171,7 +171,15 @@ void drawSoundTimeline(Sheet& sheet) {
         }
 
         if(tool == Volume) {
-
+            if(CheckCollisionPointRec(mPos, nRec) and IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                dragging_note = i;
+            }
+            if(IsMouseButtonDown(MOUSE_BUTTON_LEFT) and dragging_note == i) {
+                sheet.attack_velocities[i] = (1.0 - Clamp((mPos.y - nRec.y),0., (float)row_width)/row_width)*128;
+            }
+            if(IsMouseButtonUp(MOUSE_BUTTON_LEFT)) {
+                dragging_note = -1;
+            }
         }
     }
 

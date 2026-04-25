@@ -4,6 +4,7 @@
 #include "assert.h"
 #include "tests.hh"
 #include "fftw3.h"
+#include "app_mode.hh"
 
 #include "window_midi_editor.hh"
 #include "window_midi_player.hh"
@@ -62,10 +63,10 @@ int main(int argc, char* argv[])
 
     Sheet sheet = generate_full_piano_sheet();
 
-	play_midi(sheet);
 
 	fftw_plan plan{};
 
+	AppMode app_mode = Edit;
 
 	initEditor();
 
@@ -76,10 +77,21 @@ int main(int argc, char* argv[])
 
         BeginDrawing();
 
-		update_midi_playback(deltaTime);
-        draw_midi_player_screen();
+        if(app_mode == Play) {
+            update_midi_playback(deltaTime);
+            draw_midi_player_screen();
+        } else {
+            drawSoundTimeline(sheet);
+        }
 
-        //drawSoundTimeline(sheet);
+        if(IsKeyReleased(KEY_P)) {
+            if(app_mode == Play) {
+                app_mode = Edit;
+            } else if(app_mode == Edit) {
+                play_midi(sheet);
+                app_mode = Play;
+            }
+        }
 
         EndDrawing();
 
