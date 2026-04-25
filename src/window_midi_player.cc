@@ -16,9 +16,13 @@ void update_midi_playback(const float deltaTime)
 	for (int i = 0; i < notes_count; ++i)
 	{
 		notes[i].position.y += VERTICAL_SCALE * deltaTime;
-		if (playing_time >= -notes[i].position.y / VERTICAL_SCALE && playing_time <= (-notes[i].position.y + notes[i].size.y) / VERTICAL_SCALE)
+		if (notes[i].position.y >= 0)
 		{
-			
+			printf("Playing note %d at time %f seconds\n", i, playing_time);
+			// Here you can add code to play the sound associated with the note
+			// For example, you could use PlaySound() from raylib to play a sound file
+			// PlaySound(note_sound);
+			notes[i].position.y = 0; // Keep the note at the piano level
 		}
 	}
 }
@@ -47,27 +51,9 @@ void play_midi(const Sheet& sheet)
     }
 }
 
-void draw_midi_player_screen()
+void draw_piano()
 {
-	_cam.target = { 0, 0 };
-	_cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-	_cam.rotation = 0.0f;
-	_cam.zoom = (float)GetScreenWidth() / 52.0f;
-
-    BeginMode2D(_cam);
-    ClearBackground(COLOR_BACKGROUND);
-
-    for (int i = 0; i < notes_count; ++i)
-    {
-        DrawRectangleV(notes[i].position, notes[i].size, COLOR_NOTE);
-	}
-
-	Vector2 worldCenterPos = GetScreenToWorld2D({ 0, (float)GetScreenHeight() * (1.0f - PIANO_VERTICAL_WINDOW_PROPORTION) }, _cam);
-	DrawLine(-26, worldCenterPos.y, 26, worldCenterPos.y, GREEN);
-
-    EndMode2D();
-
-	Rectangle dest = { 0, (float)GetScreenHeight() * (1.0f-PIANO_VERTICAL_WINDOW_PROPORTION), (float)GetScreenWidth(), GetScreenHeight() * PIANO_VERTICAL_WINDOW_PROPORTION };
+	Rectangle dest = { 0, (float)GetScreenHeight() * (1.0f - PIANO_VERTICAL_WINDOW_PROPORTION), (float)GetScreenWidth(), GetScreenHeight() * PIANO_VERTICAL_WINDOW_PROPORTION };
 	Vector2 origin = { 1.0f / 2.0f, 1.0f / 2.0f };
 
 	DrawTexturePro
@@ -80,4 +66,30 @@ void draw_midi_player_screen()
 		},
 		dest, origin, 0, WHITE
 	);
+}
+
+void draw_midi_player_screen()
+{
+    ClearBackground(COLOR_BACKGROUND);
+
+	draw_piano();
+
+    BeginMode2D(_cam);
+
+	_cam.target = { 0, 0 };
+	_cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+	_cam.rotation = 0.0f;
+	_cam.zoom = (float)GetScreenWidth() / 52.0f;
+
+	Vector2 worldCenterPos = GetScreenToWorld2D({ 0, (float)GetScreenHeight() * (1.0f - PIANO_VERTICAL_WINDOW_PROPORTION) }, _cam);
+	_cam.target = { 0, -worldCenterPos.y };
+
+    for (int i = 0; i < notes_count; ++i)
+    {
+        DrawRectangleV(notes[i].position, notes[i].size, COLOR_NOTE);
+	}
+
+	DrawLine(-26, 0, 26, 0, GREEN);
+
+    EndMode2D();
 }
