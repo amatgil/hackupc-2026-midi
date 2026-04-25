@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "raylib.h"
 #include "assert.h"
+#include "tests.hh"
 
 #include "window_midi_editor.hh"
 #include "window_midi_player.hh"
@@ -12,19 +13,24 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 450
 
-int main_fake(int argc, char* argv[])
-{
-    if (argc == 3)
-    {
-        int wdth = atoi(argv[1]);
-        int hght = atoi(argv[2]);
+void run_tests() {
+  parse_header_from_file();
+}  
 
-        InitWindow(wdth, hght, "Midi");
-    }
-    else
-    {
-        InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Midi");
-    }
+int main(int argc, char* argv[])
+{
+  if (argc == 2 && argv[1][0] == 't') {
+      run_tests();
+      return 0;
+  }
+  if (argc == 3) {
+    int wdth = atoi(argv[1]);
+    int hght = atoi(argv[2]);
+
+    InitWindow(wdth, hght, "Midi");
+  } else {
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Midi");
+  }
 
     ToggleFullscreen();
 
@@ -57,16 +63,3 @@ int main_fake(int argc, char* argv[])
 }
 
 
-int main() {
-  char s[] = {0x4d, 0x54, 0x68, 0x64,
-              0x00, 0x00, 0x00, 0x06,
-              0x00, 0x01,
-              0x00, 0x02
-  };
-
-  Header h = parse_headers(s, 12);
-  assert(h.length == 6);
-  assert(h.format == 1);
-  assert(h.division == 2);
-  printf("Tot ok!\n");
-}
