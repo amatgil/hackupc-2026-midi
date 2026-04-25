@@ -188,7 +188,7 @@ void draw_midi_player_screen()
         DrawRectangleV(notes[i].position, notes[i].size, (notes[i].is_flat) ? COLOR_NOTE_FLAT : COLOR_NOTE);
 	}
 
-	DrawLine(-26, 0, 26, 0, GREEN);
+	DrawLine(-26, 0, 26, 0, BLACK);
 
     EndMode2D();
 }
