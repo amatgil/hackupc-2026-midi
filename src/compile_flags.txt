@@ -16,3 +16,4 @@
 -Wuninitialized
 -Wunreachable-code
 -Wmissing-field-initializers
+-I./lib/raylib/include/
