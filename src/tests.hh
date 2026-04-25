@@ -1,8 +1,10 @@
+#pragma once
+
 #include "parsing.hh"
-#include "fft.hh"
 #include <stdlib.h>
 #include <complex.h> 
 #include <fftw3.h>
+#include "waving.hh"
 
 void parse_header_from_file() {
   //printf("Testing parse del header del fitxer simple \n");
@@ -110,3 +112,14 @@ void test_full_parse() {
   printvector(sheet.attack_velocities);
   printvector(sheet.pitch);
 }
+
+void test_FFT_samples_calling() {
+  Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
+  float* ret = extreu_fft_from_wav(&la);
+  int N = la.frameCount;
+  for (int i = 0; i < la.frameCount; ++i) {
+    double freq = (double)i * la.sampleRate / (double)N;
+    printf("%f %f\n", freq, ret[i]);
+  }    
+}
+
