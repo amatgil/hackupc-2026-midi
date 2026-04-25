@@ -77,7 +77,7 @@ void update_midi_playback(const float deltaTime)
 	for (int i = 0; i < notes_count; ++i)
 	{
 		notes[i].position.y += VERTICAL_SCALE * deltaTime;
-		if (notes[i].position.y >= 0 && !notes[i].played	)
+		if (notes[i].position.y >= -notes[i].size.y && !notes[i].played)
 		{
 			notes[i].played = true;
 			play_note_sound((unsigned int)notes[i].pitch, 2);
