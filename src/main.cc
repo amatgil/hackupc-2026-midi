@@ -32,11 +32,12 @@ int main(int argc, char* argv[])
   } else {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Midi");
   }
-
     //ToggleFullscreen();
 
     InitAudioDevice();
     SetTargetFPS(60);
+
+    initialize_midi_player();
 
     Sheet sheet = 
     {
@@ -64,6 +65,8 @@ int main(int argc, char* argv[])
 
         // UPDATE APP
     }
+
+    unload_midi_player();
 
     CloseAudioDevice();
     CloseWindow();

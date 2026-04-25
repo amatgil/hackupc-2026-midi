@@ -4,8 +4,9 @@
 #include <cstdlib>
 #include <stdio.h>
 
-#include "sheet.hh"
 #include "raylib.h"
+#include "sheet.hh"
+#include "note_player.hh"
 
 #define COLOR_BACKGROUND (Color){ 88, 8, 94, 255 }
 #define COLOR_NOTE (Color){ 212, 16, 230, 255 }
@@ -18,6 +19,9 @@ typedef struct {
 	Vector2 position;
 	Vector2 size;
 } midi_player_note;
+
+void initialize_midi_player();
+void unload_midi_player();
 
 void play_midi(const Sheet& sheet);
 

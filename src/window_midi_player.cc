@@ -9,6 +9,22 @@ midi_player_note* notes = nullptr;
 
 Texture2D piano_texture;
 
+void initialize_midi_player()
+{
+	piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
+
+	load_note_sounds();
+}
+
+void unload_midi_player()
+{
+	UnloadTexture(piano_texture);
+
+	unload_note_sounds();
+
+	if (notes != nullptr) free(notes);
+}
+
 void update_midi_playback(const float deltaTime)
 {
 	playing_time += deltaTime;
@@ -29,8 +45,6 @@ void update_midi_playback(const float deltaTime)
 
 void play_midi(const Sheet& sheet) 
 {
-    piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
-
 	playing_time = 0.0f;
 
 	notes_count = sheet.pitch.size();
