@@ -17,8 +17,8 @@ enum Tools {
 
 static int xscroll_offset = 0;
 static int yscroll_offset = 0;
-const int pixels_per_second = 100;
-const int row_width = 20;
+float pixels_per_second = 100;
+float row_width = 20;
 
 static int dragging_note = -1;
 static int dragging_old_y_pos = -1;
@@ -200,13 +200,20 @@ void drawGUI() {
 	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) tool = Create;
 	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) tool = Create;
 
-    float sliderValue = 50.0f;
-    GuiSlider((Rectangle) { 0.0125f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
-    , "10\%"
-        , " 100\%"
-        , &sliderValue
+    GuiSlider((Rectangle) { 0.02f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
+    , "x min"
+        , "x Max"
+        , & pixels_per_second
         , 10
-        , 100
+        , 200
+        );
+
+    GuiSlider((Rectangle) { (1.0 - 0.02f - 0.115f) * w, 0.975f * h, w * 0.115f, 0.00625f * h }
+    , "y min"
+        , "y Max"
+        , & row_width
+        , 10
+        , 80
         );
 }
 
