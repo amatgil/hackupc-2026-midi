@@ -103,14 +103,17 @@ float ratio_between(float a, float b) {
 }
 
 void smooth_out_pitches(double *pitches, size_t number_pitches) {
+    size_t smoothing_window_size = min(5ul, number_pitches);
   double* temp = (double*)malloc(number_pitches * sizeof(double));
-  for (int i = SMOOTHING_WINDOW_SIZE/2; i < number_pitches - SMOOTHING_WINDOW_SIZE/2; ++i) {
+  for (int i = smoothing_window_size/2; i < number_pitches - smoothing_window_size/2; ++i) {
     double sum = 0;
-    for (int j = i - SMOOTHING_WINDOW_SIZE/2; j < i + SMOOTHING_WINDOW_SIZE/2; ++j) sum += pitches[j];
-    temp[i] = sum/SMOOTHING_WINDOW_SIZE;
+    for (int j = i - smoothing_window_size/2; j < i + smoothing_window_size/2; ++j) {
+        sum += pitches[j];
+    }
+    temp[i] = sum/(double)smoothing_window_size;
   }
   printf("Changing!\n");
-  for (int i = SMOOTHING_WINDOW_SIZE/2; i < number_pitches - SMOOTHING_WINDOW_SIZE/2; ++i) pitches[i] = temp[i];
+  for (int i = smoothing_window_size/2; i < number_pitches - smoothing_window_size/2; ++i) pitches[i] = temp[i];
   printf("Changed!\n");
 
   free(temp);
@@ -123,6 +126,9 @@ Sheet pitches_to_sheet(double *pitches, size_t number_pitches, float sampleRate,
   Sheet s;
   double past_note_frequency = 0; // Notes below 25Hz do not exist
   unsigned int past_note_start_i = 0;
+
+  double candidate_note_frequency = 0; // Notes below 25Hz do not exist
+  unsigned int candidate_note_start_i = 0;
 
   for (unsigned int i = 0; i < number_pitches-1; ++i) {
     if (pitches[i] < 25 && past_note_frequency > 25) {
