@@ -6,7 +6,7 @@
 // https://ccrma.stanford.edu/~craig/14q/midifile/MidiFileFormat.html#track_event
 Sheet *parse_midi(unsigned char *text, unsigned int text_length) {
   // TODO
-  return NULL;
+  return (Sheet*)0;
 }
 
 Header parse_header(unsigned char* text, unsigned int text_length) {

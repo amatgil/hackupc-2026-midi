@@ -12,6 +12,15 @@ Texture2D piano_texture;
 void update_midi_playback(const float deltaTime)
 {
 	playing_time += deltaTime;
+
+	for (int i = 0; i < notes_count; ++i)
+	{
+		notes[i].position.y += VERTICAL_SCALE * deltaTime;
+		if (playing_time >= -notes[i].position.y / VERTICAL_SCALE && playing_time <= (-notes[i].position.y + notes[i].size.y) / VERTICAL_SCALE)
+		{
+			
+		}
+	}
 }
 
 void play_midi(const Sheet& sheet) 
@@ -40,7 +49,7 @@ void play_midi(const Sheet& sheet)
 
 void draw_midi_player_screen()
 {
-	_cam.target = { 0, -playing_time * VERTICAL_SCALE };
+	_cam.target = { 0, 0 };
 	_cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 	_cam.rotation = 0.0f;
 	_cam.zoom = (float)GetScreenWidth() / 52.0f;
@@ -53,9 +62,12 @@ void draw_midi_player_screen()
         DrawRectangleV(notes[i].position, notes[i].size, COLOR_NOTE);
 	}
 
+	Vector2 worldCenterPos = GetScreenToWorld2D({ 0, (float)GetScreenHeight() * (1.0f - PIANO_VERTICAL_WINDOW_PROPORTION) }, _cam);
+	DrawLine(-26, worldCenterPos.y, 26, worldCenterPos.y, GREEN);
+
     EndMode2D();
 
-	Rectangle dest = { 0, GetScreenHeight() * (1.0f-PIANO_VERTICAL_WINDOW_PROPORTION), (float)GetScreenWidth(), GetScreenHeight() * PIANO_VERTICAL_WINDOW_PROPORTION };
+	Rectangle dest = { 0, (float)GetScreenHeight() * (1.0f-PIANO_VERTICAL_WINDOW_PROPORTION), (float)GetScreenWidth(), GetScreenHeight() * PIANO_VERTICAL_WINDOW_PROPORTION };
 	Vector2 origin = { 1.0f / 2.0f, 1.0f / 2.0f };
 
 	DrawTexturePro

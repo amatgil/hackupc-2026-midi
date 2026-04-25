@@ -32,12 +32,20 @@ int main(int argc, char* argv[])
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Midi");
   }
 
-    ToggleFullscreen();
+    //ToggleFullscreen();
 
     InitAudioDevice();
     SetTargetFPS(60);
 
-    Sheet sheet;
+    Sheet sheet = 
+    {
+        {0,1,2,3,4}, // timestamps_start
+        {1,1,1,1,1}, // durations
+        {0,13,28,39,52}, // pitch
+		{100,100,100,100,100}, // attack_velocities
+		5 // total_duration
+    };
+	play_midi(sheet);
 
     float deltaTime = 0;
     while (!WindowShouldClose())
@@ -45,11 +53,11 @@ int main(int argc, char* argv[])
         deltaTime = GetFrameTime();
 
         BeginDrawing();
-
+        
+		update_midi_playback(deltaTime);
         draw_midi_player_screen();
 
         //drawSoundTimeline();
-
 
         EndDrawing();
 
