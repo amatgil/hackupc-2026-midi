@@ -25,6 +25,28 @@ void unload_midi_player()
 	if (notes != nullptr) free(notes);
 }
 
+void play_midi(const Sheet& sheet)
+{
+	playing_time = 0.0f;
+
+	notes_count = sheet.pitch.size();
+	if (notes != nullptr) free(notes);
+
+	notes = (midi_player_note*)malloc(sizeof(midi_player_note) * notes_count);
+	for (int i = 0; i < notes_count; ++i)
+	{
+		float width = 1.0f;
+		float height = (float)sheet.durations[i] * VERTICAL_SCALE;
+		float x = (float)sheet.pitch[i] - 26; // TODO: posar de -26 a 25  (Tecles blanques)
+		float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height - INITIAL_DELAY * VERTICAL_SCALE;
+
+		notes[i].position = { x, y };
+		notes[i].size = { width, height };
+
+		printf("Note %d: position=(%f, %f), size=(%f, %f)\n", i, x, y, width, height);
+	}
+}
+
 void update_midi_playback(const float deltaTime)
 {
 	playing_time += deltaTime;
@@ -41,28 +63,6 @@ void update_midi_playback(const float deltaTime)
 			notes[i].position.y = 0; // Keep the note at the piano level
 		}
 	}
-}
-
-void play_midi(const Sheet& sheet) 
-{
-	playing_time = 0.0f;
-
-	notes_count = sheet.pitch.size();
-	if (notes != nullptr) free(notes);
-
-    notes = (midi_player_note*)malloc(sizeof(midi_player_note) * notes_count);
-	for (int i = 0; i < notes_count; ++i)
-    {
-        float width = 1.0f;
-        float height = (float)sheet.durations[i] * VERTICAL_SCALE;
-        float x = (float)sheet.pitch[i] - 26; // TODO: posar de -26 a 25  (Tecles blanques)
-        float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height;
-
-        notes[i].position = { x, y };
-        notes[i].size = { width, height };
-
-		printf("Note %d: position=(%f, %f), size=(%f, %f)\n", i, x, y, width, height);
-    }
 }
 
 void draw_piano()

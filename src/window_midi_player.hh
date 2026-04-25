@@ -15,6 +15,8 @@
 
 #define PIANO_VERTICAL_WINDOW_PROPORTION 1.0f/5.0f
 
+#define INITIAL_DELAY 0.0f
+
 typedef struct {
 	Vector2 position;
 	Vector2 size;
