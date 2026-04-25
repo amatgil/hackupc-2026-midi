@@ -44,7 +44,7 @@ void play_midi(const Sheet& sheet)
 	{
 		float width = 1.0f;
 		float height = (float)sheet.durations[i] * VERTICAL_SCALE;
-		float x = (float)sheet.pitch[i] - 26; // TODO: posar de -26 a 25  (Tecles blanques)
+		float x = (float)sheet.pitch[i] - 26; // TODO: posar de -26 a 25  (Tecles blanques), convertir be posicio bemolls i tal
 		float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height - INITIAL_DELAY * VERTICAL_SCALE;
 
 		notes[i].position = { x, y };
