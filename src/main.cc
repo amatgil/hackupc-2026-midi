@@ -18,9 +18,9 @@
 void run_tests() {
   //parse_header_from_file();
   //test_FFT_samples();
-  //test_FFT_samples_calling();
-  test_FFT_with_chunking_yay();
+  test_FFT_samples();
   //test_variable_length_quantity();
+  test_full_parse();
 }  
 
 Sheet generate_full_piano_sheet()
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 
     initialize_midi_player();
 
-    Sheet sheet = generate_full_piano_sheet();
+    Sheet sheet = read_midi_file("../assets/testfiles/Op10No3Midi.mid", 120);
 
 
 	fftw_plan plan{};

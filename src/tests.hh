@@ -80,6 +80,39 @@ void test_FFT_samples() {
   UnloadWaveSamples(samples);
 }
 
+
+void printvector(const vector<float>& v) {
+  for (auto x: v) {
+    printf("%f, ", x);
+  }
+  printf("\n");
+}
+void printvector(const vector<unsigned int>& v) {
+  for (auto x: v) {
+    printf("%d, ", x);
+  }
+  printf("\n");
+}
+
+void test_full_parse() {
+  printf("Testing parse del header del fitxer simple \n");
+  FILE* fptr = fopen("../assets/testfiles/SimpleMidi.mid", "r");
+  assert(fptr != NULL);
+  unsigned int i = 0, c;
+  unsigned char* s = (unsigned char*)malloc(10000);
+  
+  while ((c = fgetc(fptr)) != EOF) {
+    s[i] = c;
+    i++;
+  }
+  
+  Sheet sheet = parse_midi(s, i, 120);
+  printvector(sheet.timestamps_start);
+  printvector(sheet.durations);
+  printvector(sheet.attack_velocities);
+  printvector(sheet.pitch);
+}
+/*
 void test_FFT_samples_calling() {
   Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
   float* ret = extreu_fft_from_wav(&la);
@@ -87,10 +120,11 @@ void test_FFT_samples_calling() {
   for (int i = 0; i < N; ++i) {
     double freq = (double)i * la.sampleRate / (double)N;
     printf("%f %f\n", freq, ret[i]);
-  }
-}
 
+  }    
+}*/
 
+/*
 void test_FFT_with_chunking_yay() {
   Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
   assert(la.channels == 1 || la.channels == 2);
@@ -111,9 +145,10 @@ void test_FFT_with_chunking_yay() {
   for (int i = 0; i < la.frameCount / FFT_CHUNK_SIZE; ++i) {
     printf("%i %f\n", i, pitches[i]);
   }
+
   free(pitches);
 
   free(samples);
 
   UnloadWave(la);
-}
+}*/
