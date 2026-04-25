@@ -17,9 +17,13 @@
 void run_tests() {
   // parse_header_from_file();
   Wave la = LoadWave("../assets/samples/Mf A4.wav");
+  printf("Got wav\n");
   float* samples = LoadWaveSamples(la);
-  FFT(samples, la.frameCount * la.channels, 1);
-  for (unsigned int i = 0; i < la.frameCount * la.channels; i++) {
+  int N = la.frameCount * la.channels;
+  printf("Got samples\n");
+  FFT(samples, N);
+
+  for (unsigned int i = 0; i < N; i++) {
     printf("%i -> %f\n", i, samples[i]);
   }    
 

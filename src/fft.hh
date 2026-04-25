@@ -68,9 +68,17 @@ void transform(complex<float>* f, int N) //
   free(W);
 }
 
-void FFT(complex<float>* f, int N, float d)
+complex<float>* FFT(float* floats, int Nunpadded)
 {
-  transform(f, N);
-  for(int i = 0; i < N; i++)
-    f[i] *= d; //multiplying by step
+  int Npadded = 1;
+  while (p < Nunpadded)
+    p <<= 1;
+
+  complex<float>* complexos = (complex<float>*)malloc(Nunpadded*sizeof(complex<float>));
+  for (int i = 0; i < N; ++i) {
+    complexos[i] = floats[i];
+  }    
+  printf("x\n");
+  transform(complexos, N);
+  return complexos;
 }
