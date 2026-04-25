@@ -219,7 +219,8 @@ void drawSoundTimeline(Sheet &sheet) {
         xscroll_offset += GetMouseWheelMove() * 30;
 
     ClearBackground(COLOR_BACKGROUND_DARK);
-    BeginScissorMode(xscroll_offset, yscroll_offset, w, 88*row_width);
+    int scissor_width = (xscroll_offset < 0) ? w - xscroll_offset : w;
+    BeginScissorMode(xscroll_offset, yscroll_offset, scissor_width, 88 * row_width);
     ClearBackground(COLOR_BACKGROUND);
     EndScissorMode();
 
