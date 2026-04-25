@@ -40,18 +40,22 @@ void play_midi(const Sheet& sheet)
 	notes = (midi_player_note*)malloc(sizeof(midi_player_note) * notes_count);
 	for (int i = 0; i < notes_count; ++i)
 	{
-		bool is_flat = flat_notes.find(sheet.pitch[i]) != flat_notes.end();
+		int pitch_adjusted = sheet.pitch[i];
+		if (pitch_adjusted > 87) pitch_adjusted = 87;
+		if (pitch_adjusted < 0) pitch_adjusted = 0;
+
+		bool is_flat = flat_notes.find(pitch_adjusted) != flat_notes.end();
 		float width = (is_flat) ? 0.5f : 1.0f;
 		float height = (float)sheet.durations[i] * VERTICAL_SCALE;
 
-		printf("Pitch: %d\n",sheet.pitch[i]);
+		printf("Pitch: %d\n", pitch_adjusted);
 
-		float x = pitch_to_position.at(sheet.pitch[i]) + ((is_flat) ? 0.25f : 0.0f);
+		float x = pitch_to_position.at(pitch_adjusted) + ((is_flat) ? 0.25f : 0.0f);
 		float y = -(float)sheet.timestamps_start[i] * VERTICAL_SCALE - height - INITIAL_DELAY * VERTICAL_SCALE;
 
 		notes[i].position = { x, y };
 		notes[i].size = { width, height };
-		notes[i].pitch = sheet.pitch[i];
+		notes[i].pitch = pitch_adjusted;
 		notes[i].played = false;
 		notes[i].is_flat = is_flat;
 
