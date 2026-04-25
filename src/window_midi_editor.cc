@@ -228,6 +228,22 @@ void drawSoundTimeline(Sheet &sheet) {
 
     drawGrid(xscroll_offset, yscroll_offset, pixels_per_second, row_width);
 
+    int start_sec = (-xscroll_offset) / pixels_per_second;
+    if (start_sec < 0) start_sec = 0;
+
+    start_sec = (start_sec / 10) * 10;
+    int end_sec = (-xscroll_offset + w) / pixels_per_second + 10;
+
+    for (int s = start_sec; s <= end_sec; s += 10) {
+        int x_pos = s * pixels_per_second + xscroll_offset;
+
+        int text_y = h - (h * 0.05f) - 20;
+
+        DrawLine(x_pos, 0, x_pos, h - (h * 0.05f), COLOR_EDITOR_TIME_STAMP);
+
+        DrawText(TextFormat("%ds", s), x_pos + 5, text_y, 20, COLOR_EDITOR_TIME_STAMP);
+    }
+
     Vector2 mPos = GetMousePosition();
     size_t size = sheet.timestamps_start.size();
     unsigned int to_remove = -1;

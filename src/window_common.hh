@@ -8,6 +8,7 @@
 
 #define COLOR_BACKGROUND (Color) { 88, 8, 94, 255 }
 #define COLOR_BACKGROUND_DARK (Color) { 32, 8, 10, 255 }
+#define COLOR_EDITOR_TIME_STAMP (Color){ 131, 13, 151, 255 }
 #define COLOR_NOTE (Color){ 212, 16, 230, 255 }
 #define COLOR_NOTE_FLAT (Color){ 176, 16, 202, 255 }
 
