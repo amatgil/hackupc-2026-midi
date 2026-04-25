@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
       run_tests();
       return 0;
   }
+  SetConfigFlags(FLAG_WINDOW_RESIZABLE);   
   if (argc == 3) {
     int wdth = atoi(argv[1]);
     int hght = atoi(argv[2]);
@@ -41,7 +42,7 @@ int main(int argc, char* argv[])
     {
         {0,1,2,3,4}, // timestamps_start
         {1,1,1,1,1}, // durations
-        {0,13,28,39,52}, // pitch
+        {0,13,28,39,51}, // pitch
 		{100,100,100,100,100}, // attack_velocities
 		5 // total_duration
     };
