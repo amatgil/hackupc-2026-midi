@@ -2,7 +2,7 @@
 
 #include "parsing.hh"
 #include <stdlib.h>
-#include <complex.h> 
+#include <complex.h>
 #include <fftw3.h>
 #include "waving.hh"
 
@@ -77,7 +77,7 @@ void test_FFT_samples() {
   fftw_destroy_plan(p);
   fftw_free(in);
 
-  UnloadWaveSamples(samples);  
+  UnloadWaveSamples(samples);
 }
 
 void test_FFT_samples_calling() {
@@ -87,7 +87,7 @@ void test_FFT_samples_calling() {
   for (int i = 0; i < N; ++i) {
     double freq = (double)i * la.sampleRate / (double)N;
     printf("%f %f\n", freq, ret[i]);
-  }    
+  }
 }
 
 
@@ -96,7 +96,7 @@ void test_FFT_with_chunking_yay() {
   assert(la.channels == 1 || la.channels == 2);
 
   float *samples_interleaved = LoadWaveSamples(la);
-  float* samples = (float*)fftw_malloc(la.frameCount*sizeof(float));
+  float* samples = (float*)malloc(la.frameCount*sizeof(float));
   int N = la.frameCount;
   if (la.channels == 1) {
     samples = samples_interleaved;
@@ -116,4 +116,4 @@ void test_FFT_with_chunking_yay() {
   free(samples);
 
   UnloadWave(la);
-}  
+}

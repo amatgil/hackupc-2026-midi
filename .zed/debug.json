@@ -11,6 +11,7 @@
       "cwd": "$ZED_WORKTREE_ROOT/build/",
     },
     "program": "$ZED_WORKTREE_ROOT/build/HackUPC-2026-midi",
+    "args": ["t"],
     "request": "launch",
     "adapter": "CodeLLDB",
     "cwd": "$ZED_WORKTREE_ROOT/build/",
