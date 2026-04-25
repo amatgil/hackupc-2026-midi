@@ -84,9 +84,31 @@ void test_FFT_samples_calling() {
   Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
   float* ret = extreu_fft_from_wav(&la);
   int N = la.frameCount;
-  for (int i = 0; i < la.frameCount; ++i) {
+  for (int i = 0; i < N; ++i) {
     double freq = (double)i * la.sampleRate / (double)N;
     printf("%f %f\n", freq, ret[i]);
   }    
 }
 
+
+void test_FFT_with_chunking_yay() {
+  Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
+  assert(la.channels == 1 || la.channels == 2);
+
+  float *samples_interleaved = LoadWaveSamples(la);
+  float* samples = (float*)fftw_malloc(la.frameCount*sizeof(float));
+  int N = la.frameCount;
+  if (la.channels == 1) {
+    samples = samples_interleaved;
+  } else if (la.channels == 2) {
+    for (int i = 0; i < N; ++i) {
+      samples[i] = (double)((samples_interleaved[2 * i] + samples_interleaved[2 * i + 1]) * 0.5); // Average
+    }
+  }
+
+  float* pitches = which_pitch_is_playing_at_each_time_instance(samples, la.frameCount, la.sampleRate);
+
+  for (int i = 0; i < la.frameCount / FFT_CHUNK_SIZE; ++i) {
+    printf("%i %f\n", i, pitches[i]);
+  }
+}  
