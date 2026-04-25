@@ -26,8 +26,8 @@ Sheet generate_full_piano_sheet()
 
     for (int i = 0; i < 88; ++i)
     {
-        sheet.timestamps_start.push_back((float)i);
-        sheet.durations.push_back(1.0f);
+        sheet.timestamps_start.push_back((float)i/2.);
+        sheet.durations.push_back(0.5f);
         sheet.pitch.push_back(i);
         sheet.attack_velocities.push_back(100);
     }

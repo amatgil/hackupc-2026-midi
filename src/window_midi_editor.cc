@@ -169,6 +169,10 @@ void drawSoundTimeline(Sheet& sheet) {
                 to_remove = i;
             }
         }
+
+        if(tool == Volume) {
+
+        }
     }
 
     if (to_remove != -1) {
