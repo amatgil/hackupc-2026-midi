@@ -146,6 +146,18 @@ void drawCursor() {
                BLACK);
 }
 
+void drawPiano()
+{
+    DrawTexturePro(
+        piano_texture_vertical,
+        { 0, 0, (float)120, (float)2644 },
+        { 0, (float)yscroll_offset, 120, 88 * row_width },
+        { 0, 0 },
+        0,
+        WHITE
+    );
+}
+
 void drawGUI() {
     float w = (float)GetScreenWidth();
     float h = (float)GetScreenHeight();
@@ -178,15 +190,6 @@ void drawGUI() {
         , 10
         , 100
         );
-
-    DrawTexturePro(
-        piano_texture_vertical,
-        { 0, 0, (float)120, (float)2644 },
-        { 0, (float)yscroll_offset, 120, 88*row_width },
-        { 0, 0 },
-        0,
-        WHITE
-	);
 }
 
 void drawSoundTimeline(Sheet &sheet) {
@@ -198,11 +201,11 @@ void drawSoundTimeline(Sheet &sheet) {
         xscroll_offset += GetMouseWheelMove() * 30;
 
     ClearBackground(COLOR_BACKGROUND_DARK);
-    BeginScissorMode(xscroll_offset, yscroll_offset, w, 87*row_width);
+    BeginScissorMode(xscroll_offset, yscroll_offset, w, 88*row_width);
     ClearBackground(COLOR_BACKGROUND);
     EndScissorMode();
 
-    draw_background_gradient();
+    draw_background_gradient({255,255,255,100});
 
     drawGrid(xscroll_offset, yscroll_offset, pixels_per_second, row_width);
 
@@ -265,6 +268,8 @@ void drawSoundTimeline(Sheet &sheet) {
     } else if (IsKeyPressed(KEY_V)) {
         tool = Volume;
     }
+
+    drawPiano();
 
     drawGUI();
 

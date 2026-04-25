@@ -157,7 +157,7 @@ void draw_midi_player_screen()
     ClearBackground(COLOR_BACKGROUND);
 
 	draw_background();
-	draw_background_gradient();
+	draw_background_gradient(WHITE);
 
 	draw_piano();
 

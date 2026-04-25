@@ -16,13 +16,13 @@ void unload_common_gui_assets()
 	UnloadTexture(background_gradient);
 }
 
-void draw_background_gradient()
+void draw_background_gradient(Color color)
 {
 	DrawTexturePro(background_gradient,
 		{ 0, 0, (float)200, (float)200 },
 		{ 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() },
 		{ 0, 0 },
 		0,
-		WHITE
+		color
 	);
 }
