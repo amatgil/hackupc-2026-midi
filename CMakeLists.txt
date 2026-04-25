@@ -23,12 +23,18 @@ if (NOT raylib_FOUND)
     GIT_TAG        5.5
   )
 
+  FetchContent_Declare(
+  fftw
+  URL https://www.fftw.org/fftw-3.3.11.tar.gz
+  )
+
   FetchContent_MakeAvailable(raylib)
+  FetchContent_MakeAvailable(fftw)
 endif()
 
 add_executable(${CMAKE_PROJECT_NAME} ${SRC})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC src)
-target_link_libraries(${CMAKE_PROJECT_NAME} raylib)
+target_link_libraries(${CMAKE_PROJECT_NAME} "raylib;fftw3")
 
 file(CREATE_LINK ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/shaders SYMBOLIC)
 file(CREATE_LINK ${CMAKE_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/assets SYMBOLIC)

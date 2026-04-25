@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include "assert.h"
 #include "tests.hh"
+#include "fftw3.h"
 
 #include "window_midi_editor.hh"
 #include "window_midi_player.hh"
@@ -48,6 +49,9 @@ int main(int argc, char* argv[])
 		5 // total_duration
     };
 	play_midi(sheet);
+
+	fftw_plan plan{};
+
 
 	initEditor();
 
