@@ -3,6 +3,7 @@
 #include "fftw3.h"
 #include <cstdint>
 #include <cstdio>
+#include <ratio>
 
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length,
@@ -86,15 +87,15 @@ unsigned int frequency_to_pitch(float freq) {
   return 12 * logarithm + 48;
 }
 
-void add_note_to_sheet(Sheet *s, float offset, unsigned int& past_note_start_i,
+void add_note_to_sheet(Sheet *s, float offset, unsigned int past_note_start_i,
                        float sampleRate, unsigned int i,
                        float past_note_frequency) {
+                           if(past_note_frequency < 25) return;
   s->timestamps_start.push_back(offset +
                                past_note_start_i * FFT_CHUNK_SIZE / sampleRate);
   s->durations.push_back((i - past_note_start_i) * FFT_CHUNK_SIZE / sampleRate);
   s->pitch.push_back(frequency_to_pitch(past_note_frequency));
   s->attack_velocities.push_back(0); // No s'utilitza
-  past_note_start_i = i;
 }
 
 // Always >= 1
@@ -130,30 +131,30 @@ Sheet pitches_to_sheet(double *pitches, size_t number_pitches, float sampleRate,
   double candidate_note_frequency = 0; // Notes below 25Hz do not exist
   unsigned int candidate_note_start_i = 0;
 
-  for (unsigned int i = 0; i < number_pitches-1; ++i) {
-    if (pitches[i] < 25 && past_note_frequency > 25) {
-      add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, i, past_note_frequency);
-      past_note_frequency = 0;
-    }
-    else if (pitches[i] > 25 && past_note_frequency > 25) {
+  for (unsigned int i = 0; i < number_pitches; ++i) {
       if (ratio_between(pitches[i], past_note_frequency) >
           MAX_FREQ_RATIO_THRESHOLD) {
-        add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, i,
-                          past_note_frequency);
-        past_note_frequency = pitches[i];
-      } else {
-        past_note_frequency += pitches[i] / (i - past_note_start_i) -
-                               past_note_frequency / (i-past_note_start_i+1);
-      }
+              if(ratio_between(candidate_note_frequency, pitches[i]) > MAX_FREQ_RATIO_THRESHOLD) {
+                  candidate_note_frequency = pitches[i];
+                  candidate_note_start_i = i;
+              } else if(i - candidate_note_start_i > MAX_BEFORE_CLIPPING) {
+                  add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, candidate_note_start_i,
+                                    past_note_frequency);
+                  past_note_start_i = candidate_note_start_i;
+                  past_note_frequency = candidate_note_frequency;
+                  candidate_note_frequency = 0;
+                  candidate_note_start_i = i;
+              } else {
+                  candidate_note_frequency += pitches[i] / (i - candidate_note_start_i+1) -
+                                         candidate_note_frequency / (i-candidate_note_start_i+1);
+              }
 
-    }
-    else if (pitches[i] < 25 && past_note_frequency < 25) {
-      // No tenim cap nota, estem en silenci, cap problema
-    }
-    else if (pitches[i] > 25 && past_note_frequency < 25) {
-      past_note_start_i = i;
-      past_note_frequency = pitches[i];
-    }
+      } else {
+        past_note_frequency += pitches[i] / (i - past_note_start_i+1) -
+                               past_note_frequency / (i-past_note_start_i+1);
+        candidate_note_frequency = 0;
+        candidate_note_start_i = i;
+      }
 
   }
   return s;
