@@ -102,9 +102,24 @@ float ratio_between(float a, float b) {
   return max(a, b) / min(a, b);
 }
 
+void smooth_out_pitches(double *pitches, size_t number_pitches) {
+  double* temp = (double*)malloc(number_pitches * sizeof(double));
+  for (int i = SMOOTHING_WINDOW_SIZE/2; i < number_pitches - SMOOTHING_WINDOW_SIZE/2; ++i) {
+    double sum = 0;
+    for (int j = i - SMOOTHING_WINDOW_SIZE/2; j < i + SMOOTHING_WINDOW_SIZE/2; ++j) sum += pitches[j];
+    temp[i] = sum/SMOOTHING_WINDOW_SIZE;
+  }
+  printf("Changing!\n");
+  for (int i = SMOOTHING_WINDOW_SIZE/2; i < number_pitches - SMOOTHING_WINDOW_SIZE/2; ++i) pitches[i] = temp[i];
+  printf("Changed!\n");
+
+  free(temp);
+}
+
 // Takes samples at sample_rate and return Sheet
 Sheet pitches_to_sheet(double *pitches, size_t number_pitches, float sampleRate,
                        float offset) {
+  smooth_out_pitches(pitches, number_pitches);
   Sheet s;
   double past_note_frequency = 0; // Notes below 25Hz do not exist
   unsigned int past_note_start_i = 0;
