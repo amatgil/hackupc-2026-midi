@@ -44,10 +44,9 @@ void test_variable_length_quantity() {
 }
 
 void test_FFT_samples() {
-  Wave la = LoadWave("../assets/samples/Note_24.wav");
+  Wave la = LoadWave("../assets/testfiles/guillem_whistling.wav");
   float* samples = LoadWaveSamples(la);
 
-  printf("Channels = %i\n", la.channels);
   assert(la.channels == 1 || la.channels == 2);
   int N = la.frameCount;
   fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
@@ -67,7 +66,7 @@ void test_FFT_samples() {
     }
   }
   fftw_execute(p);
-  for (unsigned int i = 0; i < N / 5; i++) {
+  for (unsigned int i = 0; i < N / 2; i++) {
     double freq = (double)i * la.sampleRate / (double)N;
     double re = out[i][0];
     double im = out[i][1];
