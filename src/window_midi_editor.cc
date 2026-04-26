@@ -1,12 +1,21 @@
 #include "window_midi_editor.hh"
+#include "parsing.hh"
 #include "raymath.h"
 #include "utils.hh"
 #include "window_common.hh"
 #include <array>
 #include <iostream>
 
+#include "raylib.h"
+
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+
+#undef RAYGUI_IMPLEMENTATION            // Avoid including raygui implementation again
+
+#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
+#include "gui_file_explorer.hh"
+
 
 enum Tools {
     Move = 0,
@@ -33,6 +42,8 @@ static array<Texture, 6> cursors;
 static float playing_time = 0.0f;
 static int editor_playback_notes_count = 0;
 static editorPlaybackNote* editor_playback_notes = nullptr;
+
+static GuiWindowFileDialogState fdstate;
 
 void startPlaying(const Sheet& sheet)
 {
@@ -183,6 +194,7 @@ void initEditor() {
     cursors[3] = LoadTexture("assets/icons/boxicons--plus-circle-filled.png");
     cursors[4] = LoadTexture("assets/icons/boxicons--volume-full-filled.png");
 
+    fdstate = InitGuiWindowFileDialog(GetWorkingDirectory());
     HideCursor();
 }
 
@@ -255,8 +267,14 @@ void drawGUI(const Sheet& sheet) {
 	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height }, "SPLIT")) { if (tool != Playing) tool = Split; }
 	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height }, "VOLUME")) { if (tool != Playing) tool = Volume; }
 
-	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) { if (tool != Playing) tool = Create; }
-	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) { if (tool != Playing) tool = Create; }
+	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) {
+        if (tool != Playing){
+            fdstate.windowActive = true;
+        }
+    }
+	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) {
+        if (tool != Playing) tool = Create;
+	}
 
     GuiSlider((Rectangle) { 0.02f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
     , "x min"
@@ -294,10 +312,12 @@ void updateMidiEditor(const float deltaTime)
 void drawSoundTimeline(Sheet &sheet) {
     int h = GetRenderHeight();
     int w = GetRenderWidth();
+    if(not fdstate.windowActive) {
     if (IsKeyDown(KEY_LEFT_CONTROL))
         yscroll_offset += GetMouseWheelMove() * 30;
     else
         xscroll_offset += GetMouseWheelMove() * 30;
+    }
 
     Vector2 mPos = GetMousePosition();
     float float_h = (float)h;
@@ -417,6 +437,15 @@ void drawSoundTimeline(Sheet &sheet) {
             tool = Create;
         }
     }
+
+    if(fdstate.SelectFilePressed) {
+        std::string fname =  std::string(fdstate.dirPathText) + "/" + std::string(fdstate.fileNameText);
+        // TODO: way 120?
+        sheet = read_midi_file(fname.c_str(), 120.f);
+        fdstate.SelectFilePressed = false;
+    }
+
+    GuiWindowFileDialog(&fdstate);
 
     drawPiano();
 

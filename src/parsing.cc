@@ -16,7 +16,7 @@ Sheet parse_midi(unsigned char *text, unsigned int text_length, float BPM) {
     parse_track_chunk(text, text_length, longitud_llegida, s);
     text += longitud_llegida;
   }
-  
+
   s.total_duration /= (h.division*BPM/60.0f);
   for (int i = 0; i < s.durations.size(); ++i) {
     s.timestamps_start[i] /= (h.division*BPM/60.0f);
@@ -64,7 +64,7 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longi
 
   unsigned char running_status = 0;
   unsigned int current_time = 0;
-  
+
   while(current < end_of_chunk) {
     // 1. Llegir v-time
     unsigned int vtime_size = 0;
@@ -74,10 +74,10 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longi
 
     // 2. Llegir l'event status
     unsigned char status = *current;
-    
+
     // Per debugging, pots descomentar això:
     //printf("Status: %x (vtime: %llu, current_time: %u)\n", status, vtime, current_time);
-    
+
     if (status < 0x80) {
       // Event data (Running status)
       status = running_status;
@@ -119,7 +119,7 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longi
       // --- Standard MIDI Event ---
       unsigned char event_type = status >> 4; // Top 4 bits dictate the event type
       unsigned char channel = status & 0x0F;
-      
+
       // Program Change (0xC) and Channel Pressure (0xD) only have 1 data byte.
       if (event_type == 0xC || event_type == 0xD) {
           unsigned char data1 = *current++;
@@ -128,7 +128,7 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longi
           // All other standard MIDI events have 2 data bytes.
           unsigned char data1 = *current++;
           unsigned char data2 = *current++;
-          
+
           // Note On (Amb velocitat > 0)
           if (event_type == 0x9 && data2 > 0) {
             //printf("Entered NoteON (Pitch: %d, Vel: %d)\n", data1, data2);
@@ -138,17 +138,17 @@ void parse_track_chunk(unsigned char *text, unsigned int text_length, int& longi
           }
           // Note Off (o Note On amb velocitat == 0)
           else if (event_type == 0x8 || (event_type == 0x9 && data2 == 0)) {
-            
+
             //printf("Entered NoteOff (Pitch: %d)\n", data1);
-            
+
             // La duració és el temps actual menys quan va començar
             unsigned int duration = current_time - keys_held_start[data1];
-            
-            sheet.timestamps_start.push_back(keys_held_start[data1]); 
-            sheet.durations.push_back(duration); 
+
+            sheet.timestamps_start.push_back(keys_held_start[data1]);
+            sheet.durations.push_back(duration);
             if (data1-21 > 87) data1 = 87+21;
             sheet.pitch.push_back(data1-21);
-            sheet.attack_velocities.push_back(keys_held_velocity[data1]); 
+            sheet.attack_velocities.push_back(keys_held_velocity[data1]);
           }
       }
     }
@@ -165,12 +165,12 @@ uint64_t read_variable_length_quantity(unsigned char *text, unsigned int& size) 
     data = data << 7;
     data |= byte;
     ++i;
-  } // Si el MSB és 0, parem 
+  } // Si el MSB és 0, parem
 
   char byte = text[i] & 0x7F;
   data = data << 7;
   data |= byte;
-  
+
   size = i + 1;
   return data;
 }
@@ -183,7 +183,7 @@ uint32_t read_big_endian_4_bytes(unsigned char *text) {
 }
 
 uint16_t read_big_endian_2_bytes(unsigned char *text) {
-  return (uint16_t)text[0] << 8  | 
+  return (uint16_t)text[0] << 8  |
            (uint16_t)text[1] << 0;
 }
 
@@ -197,7 +197,7 @@ uint16_t read_big_endian_2_bytes(unsigned char *text) {
     data = data << 7;
     data |= byte;
     ++i;
-  } // Si el MSB és 0, parem 
+  } // Si el MSB és 0, parem
 
   char byte = text[i] & 0x7F;
   data = data << 7;
@@ -208,16 +208,16 @@ uint16_t read_big_endian_2_bytes(unsigned char *text) {
 
 
 
-Sheet read_midi_file(char* file, float BPM) {
+Sheet read_midi_file(const char* file, float BPM) {
   printf("Testing parse del header del fitxer simple \n");
-  
+
   FILE* fptr = fopen(file, "r");
   assert(fptr != NULL);
-  
+
   unsigned int i = 0, c;
   fseek(fptr, 0L, SEEK_END);
   unsigned int sz = ftell(fptr);
-  
+
   unsigned char* s = (unsigned char*) malloc(sz);
   rewind(fptr);
   printf("Size: %d\n", sz);
@@ -225,6 +225,6 @@ Sheet read_midi_file(char* file, float BPM) {
     s[i] = c;
     i++;
   }
-  
+
   return parse_midi(s, i, BPM);
 }

@@ -13,8 +13,8 @@
 #include "sheet.hh"
 #include "parsing.hh"
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 450
+#define SCREEN_WIDTH 1080
+#define SCREEN_HEIGHT 720
 
 void run_tests() {
   //parse_header_from_file();
