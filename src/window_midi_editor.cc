@@ -41,7 +41,7 @@ static Vector2 dragging_offset = {0, 0};
 static Tools tool = Move;
 static float new_note_duration = 1.0f;
 Sheet palette_sheet;
-static array<Texture, 6> cursors;
+static array<Texture, 9> cursors;
 
 static float playing_time = 0.0f;
 static int editor_playback_notes_count = 0;
@@ -192,11 +192,24 @@ void initEditor() {
     palette_sheet.timestamps_start = {0.0f};
     palette_sheet.pitch = {0};
 
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ColorToInt(COLOR_BUTTON));
+    GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, ColorToInt(COLOR_GUI_DARK));
+    GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, ColorToInt(COLOR_GUI_DARK));
+
+    GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, ColorToInt(BLACK));
+    GuiSetStyle(BUTTON, BORDER_COLOR_NORMAL, ColorToInt(BLACK));
+    GuiSetStyle(BUTTON, BORDER_COLOR_FOCUSED, ColorToInt(BLACK));
+    GuiSetStyle(BUTTON, BORDER_COLOR_PRESSED, ColorToInt(BLACK));
+
     cursors[0] = LoadTexture("assets/icons/boxicons--move.png");
     cursors[1] = LoadTexture("assets/icons/boxicons--eraser-filled.png");
     cursors[2] = LoadTexture("assets/icons/boxicons--cut-filled.png");
     cursors[3] = LoadTexture("assets/icons/boxicons--plus-circle-filled.png");
     cursors[4] = LoadTexture("assets/icons/boxicons--volume-full-filled.png");
+    cursors[5] = LoadTexture("assets/icons/fad--waveform.png");
+    cursors[6] = LoadTexture("assets/icons/fad--open.png");
+    cursors[7] = LoadTexture("assets/icons/boxicons--play.png");
+    cursors[8] = LoadTexture("assets/icons/boxicons--stop.png");
 
     fdstate = InitGuiWindowFileDialog(GetWorkingDirectory());
     HideCursor();
@@ -254,54 +267,73 @@ void drawGUI(const Sheet& sheet) {
     float w = (float)GetScreenWidth();
     float h = (float)GetScreenHeight();
 
-    DrawRectangle(0, 0, w, h * 0.1f, WHITE);
-    DrawRectangle(0, h - h * 0.05f, w, h * 0.05f, WHITE);
+    DrawRectangleGradientV(0, 0, w, h * 0.1f, COLOR_GUI_DARK, COLOR_GUI);
+    DrawRectangleGradientV(0, h - h * 0.05f, w, h * 0.05f, COLOR_GUI, COLOR_GUI_DARK);
 
-    // Square button
-	float button_height = h * 0.075f;
-	float button_width = button_height;
+    // Mides base dels botons
+    float button_height = h * 0.075f;
+    float button_width = button_height;
 
-	if (GuiButton((Rectangle) { 0.0125f * w, 0.0125f * h, button_width, button_height }, "PIANO")) tool = Create;
-    if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) { if (tool != Playing) startPlaying(sheet); else tool = Create; }
-    if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) { playing_time = 0.0f; if (tool == Playing) tool = Create; }
+    Rectangle rPlay = { 0.0125f  * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rPlay, "")) { if (tool != Playing) startPlaying(sheet); else tool = Create; }
+    DrawTexture(cursors[7], rPlay.x + rPlay.width / 2 - cursors[7].width / 2, rPlay.y + rPlay.height / 2 - cursors[7].height / 2, WHITE);
 
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) { if (tool != Playing) tool = Create; }
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height }, "DELETE")) { if (tool != Playing) tool = Delete; }
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.5f * w, 0.0125f * h, button_width, button_height }, "MOVE")) { if (tool != Playing) tool = Move; }
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height }, "SPLIT")) { if (tool != Playing) tool = Split; }
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height }, "VOLUME")) { if (tool != Playing) tool = Volume; }
+    Rectangle rStop = { 0.0625f * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rStop, "")) { playing_time = 0.0f; if (tool == Playing) tool = Create; }
+    DrawTexture(cursors[8], rStop.x + rStop.width / 2 - cursors[8].width / 2, rStop.y + rStop.height / 2 - cursors[8].height / 2, WHITE);
 
-	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) {
-        if (tool != Playing){
+
+    Rectangle rCreate = { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rCreate, "")) { if (tool != Playing) tool = Create; }
+    DrawTexture(cursors[3], rCreate.x + rCreate.width / 2 - cursors[3].width / 2, rCreate.y + rCreate.height / 2 - cursors[3].height / 2, WHITE);
+
+    Rectangle rDelete = { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rDelete, "")) { if (tool != Playing) tool = Delete; }
+    DrawTexture(cursors[1], rDelete.x + rDelete.width / 2 - cursors[1].width / 2, rDelete.y + rDelete.height / 2 - cursors[1].height / 2, WHITE);
+
+    Rectangle rMove = { w - button_width / 2.0f - 0.5f * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rMove, "")) { if (tool != Playing) tool = Move; }
+    DrawTexture(cursors[0], rMove.x + rMove.width / 2 - cursors[0].width / 2, rMove.y + rMove.height / 2 - cursors[0].height / 2, WHITE);
+
+    Rectangle rSplit = { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rSplit, "")) { if (tool != Playing) tool = Split; }
+    DrawTexture(cursors[2], rSplit.x + rSplit.width / 2 - cursors[2].width / 2, rSplit.y + rSplit.height / 2 - cursors[2].height / 2, WHITE);
+
+    Rectangle rVolume = { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rVolume, "")) { if (tool != Playing) tool = Volume; }
+    DrawTexture(cursors[4], rVolume.x + rVolume.width / 2 - cursors[4].width / 2, rVolume.y + rVolume.height / 2 - cursors[4].height / 2, WHITE);
+
+
+    Rectangle rFile = { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height };
+    if (GuiButton(rFile, "")) {
+        if (tool != Playing) {
             fdstate.windowActive = true;
         }
     }
-	if (not (tool == Recording) && GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) {
-        if (tool != Playing) {
-            tool = Recording;
-            start_recording();
-        };
-	} else if( tool == Recording && GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "STOP")) {
-	    tool = Move;
-        stop_recording();
-	}
+    DrawTexture(cursors[6], rFile.x + rFile.width / 2 - cursors[6].width / 2, rFile.y + rFile.height / 2 - cursors[6].height / 2, WHITE);
 
 
-    GuiSlider((Rectangle) { 0.02f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
-    , "x min"
-        , "x Max"
-        , & pixels_per_second
-        , 10
-        , 200
-        );
+    Rectangle rVoice = { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height };
+    if (not (tool == Recording)) {
+        if (GuiButton(rVoice, "")) {
+            if (tool != Playing) {
+                tool = Recording;
+                start_recording();
+            }
+        }
+        DrawTexture(cursors[5], rVoice.x + rVoice.width / 2 - cursors[5].width / 2, rVoice.y + rVoice.height / 2 - cursors[5].height / 2, WHITE);
+    }
+    else {
+        if (GuiButton(rVoice, "")) {
+            tool = Move;
+            stop_recording();
+        }
+        DrawTexture(cursors[8], rVoice.x + rVoice.width / 2 - cursors[8].width / 2, rVoice.y + rVoice.height / 2 - cursors[8].height / 2, WHITE);
+    }
 
-    GuiSlider((Rectangle) { (1.0f - 0.02f - 0.115f) * w, 0.975f * h, w * 0.115f, 0.00625f * h }
-    , "y min"
-        , "y Max"
-        , & row_width
-        , 10
-        , 80
-        );
+    GuiSlider((Rectangle) { 0.02f * w, 0.975f * h, w * 0.115f, 0.00625f * h }, "x min", "x Max", & pixels_per_second, 10, 200);
+
+    GuiSlider((Rectangle) { (1.0f - 0.02f - 0.115f)* w, 0.975f * h, w * 0.115f, 0.00625f * h }, "y min", "y Max", & row_width, 10, 80);
 }
 
 void recordSheet(Sheet& sheet) {
@@ -402,12 +434,12 @@ void drawSoundTimeline(Sheet &sheet) {
             }
         }
 
-        DrawRectangleRounded(nRec, 0.5, 5, GRAY);
+        DrawRectangleRounded(nRec, 0.5, 5, COLOR_NOTE);
         BeginScissorMode(nRec.x,
                          nRec.y + row_width -
                              (sheet.attack_velocities[i] / 128.) * row_width,
                          nRec.width, nRec.height);
-        DrawRectangleRounded(nRec, 0.5, 5, DARKGRAY);
+        DrawRectangleRounded(nRec, 0.5, 5, COLOR_NOTE_FLAT);
         EndScissorMode();
         if (tool == Move)
             moveTool(mPos, nRec, sheet, i);
