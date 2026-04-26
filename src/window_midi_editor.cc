@@ -34,14 +34,13 @@ static float playing_time = 0.0f;
 static int editor_playback_notes_count = 0;
 static editorPlaybackNote* editor_playback_notes = nullptr;
 
-void startPlaying(const Sheet& sheet) // <-- Afegim la Sheet com a paràmetre
+void startPlaying(const Sheet& sheet)
 {
-    std::cout << "Starting playback" << std::endl; // Mode zen activat
     if (tool == Playing) return;
     tool = Playing;
 
     if (editor_playback_notes) free(editor_playback_notes);
-    editor_playback_notes_count = sheet.pitch.size(); // Utilitzem sheet, no palette_sheet
+    editor_playback_notes_count = sheet.pitch.size();
     editor_playback_notes = (editorPlaybackNote*)malloc(sizeof(editorPlaybackNote) * sheet.pitch.size());
 
     for (int i = 0; i < sheet.pitch.size(); ++i)
@@ -302,13 +301,15 @@ void drawSoundTimeline(Sheet &sheet) {
 
     Vector2 mPos = GetMousePosition();
     float float_h = (float)h;
+
     bool isMouseOnTimeRuler = (mPos.y >= float_h - (float_h * 0.05f) - 30.0f) &&
         (mPos.y < float_h - (float_h * 0.05f));
     bool isMouseOnCanvas = (mPos.y > float_h * 0.1f) &&
         (mPos.y < float_h - (float_h * 0.05f) - 30.0f);
-    if (tool != Playing && isMouseOnTimeRuler && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+
+    if (tool != Playing && (isMouseOnCanvas || isMouseOnTimeRuler) && IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
         float new_time = (mPos.x - xscroll_offset) / pixels_per_second;
-        playing_time = (new_time > 0.0f) ? new_time : 0.0f; // Evitem temps negatius
+        playing_time = (new_time > 0.0f) ? new_time : 0.0f;
     }
 
     ClearBackground(COLOR_BACKGROUND_DARK);
