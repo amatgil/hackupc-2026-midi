@@ -11,7 +11,7 @@
 #define MAX_BEFORE_CLIPPING 4
 // Half of root(2; 12)
 #define MAX_FREQ_RATIO_THRESHOLD 1.03
-#define SMOOTHING_WINDOW_SIZE (FFT_CHUNK_SIZE/4)
+#define SMOOTHING_WINDOW_SIZE (FFT_CHUNK_SIZE/16)
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length, float sampleRate);
 

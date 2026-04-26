@@ -6,6 +6,9 @@
 #include <ratio>
 
 
+
+
+
 float *extreu_fft_from_samples(float *samples, size_t sample_length,
                                float sampleRate) {
   int N = sample_length;
@@ -67,11 +70,11 @@ double *which_pitch_is_playing_at_each_time_instance(float *samples,
     float* chunk_de_samples = samples + FFT_CHUNK_SIZE*i;
     float* fft_of_chunk = extreu_fft_from_samples(chunk_de_samples, FFT_CHUNK_SIZE, sampleRate);
 
-    // for (int j = 0; j < FFT_CHUNK_SIZE/2; j++) {
-    //     double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
-    //     printf("%f, %f\n", freq, fft_of_chunk[j]);
-    // }
-    // printf("===============");
+     // for (int j = 0; j < FFT_CHUNK_SIZE/2; j++) {
+     //     double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
+     //     printf("%f, %f\n", freq, fft_of_chunk[j]);
+     // }
+     // printf("===============");
 
     float max_freq = 0;
     float max_freq_amplitude = 0.00001;
@@ -93,6 +96,7 @@ double *which_pitch_is_playing_at_each_time_instance(float *samples,
 
     free(fft_of_chunk);
 
+    printf("%f\n",max_freq);
     ret[i] = max_freq;
   }
   return ret;

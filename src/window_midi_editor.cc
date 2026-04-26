@@ -1,7 +1,10 @@
 #include "window_midi_editor.hh"
+#include "audio_recording.hh"
 #include "parsing.hh"
 #include "raymath.h"
+#include "sheet.hh"
 #include "utils.hh"
+#include "waving.hh"
 #include "window_common.hh"
 #include <array>
 #include <iostream>
@@ -23,7 +26,8 @@ enum Tools {
     Split,
     Create,
     Volume,
-    Playing
+    Playing,
+    Recording,
 };
 
 static int xscroll_offset = 0;
@@ -272,9 +276,16 @@ void drawGUI(const Sheet& sheet) {
             fdstate.windowActive = true;
         }
     }
-	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) {
-        if (tool != Playing) tool = Create;
+	if (not (tool == Recording) && GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) {
+        if (tool != Playing) {
+            tool = Recording;
+            start_recording();
+        };
+	} else if( tool == Recording && GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "STOP")) {
+	    tool = Move;
+        stop_recording();
 	}
+
 
     GuiSlider((Rectangle) { 0.02f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
     , "x min"
@@ -291,6 +302,16 @@ void drawGUI(const Sheet& sheet) {
         , 10
         , 80
         );
+}
+
+void recordSheet(Sheet& sheet) {
+    if(microphone_buffer.size() - last_processed_index >= FFT_CHUNK_SIZE) {
+        /*for (auto& el : microphone_buffer) {
+            printf("%f\n", el);
+            }*/
+        sheet = read_sheet_from_samples(microphone_buffer.data(), microphone_buffer.size(), 44100);
+        last_processed_index += FFT_CHUNK_SIZE;
+    }
 }
 
 void updateMidiEditor(const float deltaTime)
@@ -366,6 +387,7 @@ void drawSoundTimeline(Sheet &sheet) {
         toolCreate(sheet, mPos);
     }
 
+
     float menu_top = h * 0.1f;
     float menu_bottom = h - (h * 0.05f);
 
@@ -418,6 +440,8 @@ void drawSoundTimeline(Sheet &sheet) {
     if (to_remove != -1) {
         removeNote(sheet, to_remove);
     }
+
+    if(tool == Recording) recordSheet(sheet);
 
     if (IsKeyReleased(KEY_S) && tool != Playing) {
         tool = Split;

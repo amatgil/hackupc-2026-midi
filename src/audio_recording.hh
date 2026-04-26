@@ -9,10 +9,12 @@
 #include <queue>
 #include "raylib.h"
 
+#define AUDIO_RECORDING_SPEED 44100
 
 using namespace std;
 
-vector<float> microphone_buffer;
+extern vector<float> microphone_buffer;
+static int last_processed_index = 0;
 
 void print_vec(vector<float> v);
 

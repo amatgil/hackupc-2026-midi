@@ -1,39 +1,37 @@
+#include "app_mode.hh"
+#include "assert.h"
+#include "fftw3.h"
+#include "raylib.h"
+#include "tests.hh"
 #include <cstdlib>
 #include <stdio.h>
-#include "raylib.h"
-#include "assert.h"
-#include "tests.hh"
-#include "fftw3.h"
-#include "app_mode.hh"
 
 #include "window_common.hh"
 #include "window_midi_editor.hh"
 #include "window_midi_player.hh"
 
-#include "sheet.hh"
 #include "parsing.hh"
+#include "sheet.hh"
 
 #define SCREEN_WIDTH 1080
 #define SCREEN_HEIGHT 720
 
 void run_tests() {
-  //parse_header_from_file();
-  //test_FFT_samples();
-  //test_FFT_samples();
-  //test_variable_length_quantity();
-  //test_full_parse();
-  test_FFT_with_chunking_yay();
+    // parse_header_from_file();
+    // test_FFT_samples();
+    // test_FFT_samples();
+    // test_variable_length_quantity();
+    // test_full_parse();
+    test_FFT_with_chunking_yay();
 }
 
-Sheet generate_full_piano_sheet()
-{
+Sheet generate_full_piano_sheet() {
     Sheet sheet;
 
     sheet.total_duration = 88.0f;
 
-    for (int i = 0; i < 88; ++i)
-    {
-        sheet.timestamps_start.push_back((float)i/2.);
+    for (int i = 0; i < 88; ++i) {
+        sheet.timestamps_start.push_back((float)i / 2.);
         sheet.durations.push_back(0.5f);
         sheet.pitch.push_back(i);
         sheet.attack_velocities.push_back(100);
@@ -42,78 +40,78 @@ Sheet generate_full_piano_sheet()
     return sheet;
 }
 
-int main(int argc, char* argv[])
-{
-  if (argc == 2 && argv[1][0] == 't') {
-      run_tests();
-      return 0;
-  }
-  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  if (argc == 3) {
-    int wdth = atoi(argv[1]);
-    int hght = atoi(argv[2]);
+int main(int argc, char *argv[]) {
+    if (argc == 2 && argv[1][0] == 't') {
+        run_tests();
+        return 0;
+    }
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    if (argc == 3) {
+        int wdth = atoi(argv[1]);
+        int hght = atoi(argv[2]);
 
-    InitWindow(wdth, hght, "Midi");
-  } else {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Midi");
-  }
-    //ToggleFullscreen();
+        InitWindow(wdth, hght, "Midi");
+    } else {
+        InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Midi");
+    }
+    // ToggleFullscreen();
 
     InitAudioDevice();
     SetTargetFPS(60);
 
     BeginDrawing();
-	DrawText("Loading... Shouldn't take more than 3 hours...", 10, 10, 20, WHITE);
+    DrawText("Loading... Shouldn't take more than 3 hours...", 10, 10, 20,
+             WHITE);
     EndDrawing();
 
     load_common_gui_assets();
 
     initialize_midi_player();
 
-    //Sheet sheet = read_midi_file("../assets/testfiles/Op10No3Midi.mid", 120);
+    // Sheet sheet = read_midi_file("../assets/testfiles/Op10No3Midi.mid", 120);
 
-  //Wave la = LoadWave("/tmp/A4.wav");
-  Wave la = LoadWave("./assets/testfiles/guillem_whistling.wav");
-  WaveFormat(&la, la.sampleRate, 32, 1);
-  float *samples_interleaved = LoadWaveSamples(la);
-  float* samples = (float*)malloc(la.frameCount*sizeof(float));
-  int N = la.frameCount;
-  if (la.channels == 1) {
-    samples = samples_interleaved;
-  } else if (la.channels == 2) {
-    for (int i = 0; i < N; ++i) {
-      samples[i] = (double)((samples_interleaved[2 * i] + samples_interleaved[2 * i + 1]) * 0.5); // Average
+    // Wave la = LoadWave("/tmp/A4.wav");
+    Wave la = LoadWave("./assets/testfiles/guillem_whistling.wav");
+    WaveFormat(&la, la.sampleRate, 32, 1);
+    float *samples_interleaved = LoadWaveSamples(la);
+    float *samples = (float *)malloc(la.frameCount * sizeof(float));
+    int N = la.frameCount;
+    if (la.channels == 1) {
+        samples = samples_interleaved;
+    } else if (la.channels == 2) {
+        for (int i = 0; i < N; ++i) {
+            samples[i] = (double)((samples_interleaved[2 * i] +
+                                   samples_interleaved[2 * i + 1]) *
+                                  0.5); // Average
+        }
+        free(samples_interleaved);
     }
-    free(samples_interleaved);
-  }
-  Sheet sheet = read_sheet_from_samples(samples, la.frameCount, la.sampleRate);
 
+    Sheet sheet =
+        read_sheet_from_samples(samples, la.frameCount, la.sampleRate);
 
-	fftw_plan plan{};
+    AppMode app_mode = Edit;
 
-	AppMode app_mode = Edit;
-
-	initEditor();
+    initEditor();
 
     float deltaTime = 0;
-    while (!WindowShouldClose())
-    {
+    while (!WindowShouldClose()) {
         deltaTime = GetFrameTime();
 
         BeginDrawing();
 
-        if(app_mode == Play) {
+        if (app_mode == Play) {
             update_midi_playback(deltaTime);
             draw_midi_player_screen();
         } else {
-			updateMidiEditor(deltaTime);
+            updateMidiEditor(deltaTime);
             drawSoundTimeline(sheet);
         }
 
-        if(IsKeyReleased(KEY_P)) {
-            if(app_mode == Play) {
+        if (IsKeyReleased(KEY_P)) {
+            if (app_mode == Play) {
                 app_mode = Edit;
-            } else if(app_mode == Edit) {
+            } else if (app_mode == Edit) {
                 play_midi(sheet);
                 app_mode = Play;
             }
