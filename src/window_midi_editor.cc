@@ -254,8 +254,8 @@ void drawGUI(const Sheet& sheet) {
     float w = (float)GetScreenWidth();
     float h = (float)GetScreenHeight();
 
-    DrawRectangle(0, 0, w, h * 0.1f, WHITE);
-    DrawRectangle(0, h - h * 0.05f, w, h * 0.05f, WHITE);
+    DrawRectangleGradientV(0, 0, w, h * 0.1f, COLOR_GUI_DARK ,COLOR_GUI);
+    DrawRectangleGradientV(0, h - h * 0.05f, w, h * 0.05f, COLOR_GUI, COLOR_GUI_DARK);
 
     // Square button
 	float button_height = h * 0.075f;
