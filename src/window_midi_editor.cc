@@ -13,6 +13,7 @@ enum Tools {
     Split,
     Create,
     Volume,
+    Playing
 };
 
 static int xscroll_offset = 0;
@@ -27,6 +28,8 @@ static Tools tool = Move;
 static float new_note_duration = 1.0f;
 Sheet palette_sheet;
 static array<Texture, 6> cursors;
+
+static float playing_time = 0.0f;
 
 void drawGrid(int xoffset, int yoffset, int col_width, int row_width) {
     int h = GetRenderHeight();
@@ -51,6 +54,8 @@ Rectangle getNoteRect(const Sheet &sheet, int i) {
 }
 
 void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
+	if (tool == Playing) return;
+
     if (dragging_note == i) {
         DrawRectangleLines(nRec.x, nRec.y, nRec.width, nRec.height, ORANGE);
         DrawRectangleLines(nRec.x + 1, nRec.y + 1, nRec.width - 1,
@@ -92,6 +97,8 @@ void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
 }
 
 void splitTool(Vector2 mPos, Rectangle nRec, Sheet &sheet, int i) {
+    if (tool == Playing) return;
+
     if (CheckCollisionPointRec(mPos, nRec) and
         IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         sheet.attack_velocities.push_back(sheet.attack_velocities[i]);
@@ -108,6 +115,8 @@ void splitTool(Vector2 mPos, Rectangle nRec, Sheet &sheet, int i) {
 }
 
 void removeNote(Sheet &sheet, int to_remove) {
+    if (tool == Playing) return;
+
     ut::swap(sheet.attack_velocities[to_remove],
              sheet.attack_velocities[sheet.attack_velocities.size() - 1]);
     sheet.attack_velocities.pop_back();
@@ -137,6 +146,8 @@ void initEditor() {
 }
 
 void toolCreate(Sheet &sheet, Vector2 mPos) {
+    if (tool == Playing) return;
+
     palette_sheet.timestamps_start[0] =
         (mPos.x - xscroll_offset) / pixels_per_second;
     palette_sheet.pitch[0] = 87- (int)((mPos.y - yscroll_offset) / row_width);
@@ -188,8 +199,8 @@ void drawGUI() {
 	float button_width = button_height;
 
 	if (GuiButton((Rectangle) { 0.0125f * w, 0.0125f * h, button_width, button_height }, "PIANO")) tool = Create;
-	if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) tool = Create;
-	if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) tool = Create;
+	if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) tool = Playing;
+    if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) { playing_time = 0.0f; if (tool == Playing) tool = Create; }
 
 	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) tool = Create;
 	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height }, "DELETE")) tool = Delete;
@@ -208,13 +219,18 @@ void drawGUI() {
         , 200
         );
 
-    GuiSlider((Rectangle) { (1.0 - 0.02f - 0.115f) * w, 0.975f * h, w * 0.115f, 0.00625f * h }
+    GuiSlider((Rectangle) { (1.0f - 0.02f - 0.115f) * w, 0.975f * h, w * 0.115f, 0.00625f * h }
     , "y min"
         , "y Max"
         , & row_width
         , 10
         , 80
         );
+}
+
+void updateMidiEditor(const float deltaTime)
+{
+    if (tool == Playing) playing_time += deltaTime;
 }
 
 void drawSoundTimeline(Sheet &sheet) {
@@ -250,6 +266,8 @@ void drawSoundTimeline(Sheet &sheet) {
 
         DrawText(TextFormat("%ds", s), x_pos + 5, text_y, 20, COLOR_EDITOR_TIME_STAMP);
     }
+
+    DrawLine(playing_time * pixels_per_second + xscroll_offset, 0, playing_time * pixels_per_second + xscroll_offset, h - (h * 0.05f), RED);
 
     Vector2 mPos = GetMousePosition();
     size_t size = sheet.timestamps_start.size();
@@ -299,16 +317,18 @@ void drawSoundTimeline(Sheet &sheet) {
         removeNote(sheet, to_remove);
     }
 
-    if (IsKeyReleased(KEY_S)) {
+    if (IsKeyReleased(KEY_S) && tool != Playing) {
         tool = Split;
-    } else if (IsKeyReleased(KEY_M)) {
+    } else if (IsKeyReleased(KEY_M) && tool != Playing) {
         tool = Move;
-    } else if (IsKeyPressed(KEY_E)) {
+    } else if (IsKeyPressed(KEY_E) && tool != Playing) {
         tool = Delete;
-    } else if (IsKeyPressed(KEY_C)) {
+    } else if (IsKeyPressed(KEY_C) && tool != Playing) {
         tool = Create;
-    } else if (IsKeyPressed(KEY_V)) {
+    } else if (IsKeyPressed(KEY_V) && tool != Playing) {
         tool = Volume;
+	} else if (IsKeyPressed(KEY_SPACE)) {
+        tool = (tool == Playing) ? Create : Playing;
     }
 
     drawPiano();

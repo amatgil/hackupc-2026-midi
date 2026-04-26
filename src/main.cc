@@ -104,6 +104,7 @@ int main(int argc, char* argv[])
             update_midi_playback(deltaTime);
             draw_midi_player_screen();
         } else {
+			updateMidiEditor(deltaTime);
             drawSoundTimeline(sheet);
         }
 
