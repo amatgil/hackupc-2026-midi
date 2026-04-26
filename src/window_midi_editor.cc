@@ -300,6 +300,17 @@ void drawSoundTimeline(Sheet &sheet) {
     else
         xscroll_offset += GetMouseWheelMove() * 30;
 
+    Vector2 mPos = GetMousePosition();
+    float float_h = (float)h;
+    bool isMouseOnTimeRuler = (mPos.y >= float_h - (float_h * 0.05f) - 30.0f) &&
+        (mPos.y < float_h - (float_h * 0.05f));
+    bool isMouseOnCanvas = (mPos.y > float_h * 0.1f) &&
+        (mPos.y < float_h - (float_h * 0.05f) - 30.0f);
+    if (tool != Playing && isMouseOnTimeRuler && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        float new_time = (mPos.x - xscroll_offset) / pixels_per_second;
+        playing_time = (new_time > 0.0f) ? new_time : 0.0f; // Evitem temps negatius
+    }
+
     ClearBackground(COLOR_BACKGROUND_DARK);
     int scissor_width = (xscroll_offset < 0) ? w - xscroll_offset : w;
     BeginScissorMode(xscroll_offset, yscroll_offset, scissor_width, 88 * row_width);
@@ -328,7 +339,6 @@ void drawSoundTimeline(Sheet &sheet) {
 
     DrawLine(playing_time * pixels_per_second + xscroll_offset, 0, playing_time * pixels_per_second + xscroll_offset, h - (h * 0.05f), RED);
 
-    Vector2 mPos = GetMousePosition();
     size_t size = sheet.timestamps_start.size();
     unsigned int to_remove = -1;
     if (tool == Create) {
