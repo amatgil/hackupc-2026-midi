@@ -230,7 +230,16 @@ void drawGUI() {
 
 void updateMidiEditor(const float deltaTime)
 {
-    if (tool == Playing) playing_time += deltaTime;
+    if (tool == Playing) {
+        playing_time += deltaTime;
+
+		for (int i = 0; i < palette_sheet.timestamps_start.size(); ++i) {
+            if (playing_time >= palette_sheet.timestamps_start[i] &&
+                playing_time < palette_sheet.timestamps_start[i] + palette_sheet.durations[i]) {
+                play_note_sound(palette_sheet.pitch[i], palette_sheet.attack_velocities[i]);
+            }
+        }
+    }
 }
 
 void drawSoundTimeline(Sheet &sheet) {
