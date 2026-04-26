@@ -16,6 +16,8 @@ float background_texture_y = 0.0f;
 
 bool played_keys[88] = { false };
 
+bool pedal_active = false;
+
 void initialize_midi_player()
 {
 	piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
@@ -76,6 +78,8 @@ void update_midi_playback(const float deltaTime)
 {
 	playing_time += deltaTime;
 
+	if (IsKeyPressed(KEY_T)) pedal_active = !pedal_active;
+
 	float texW = BACKGROUND_TEXTURE_SIZE * BACKGROUND_SCALE;
 	float texH = BACKGROUND_TEXTURE_SIZE * BACKGROUND_SCALE;
 
@@ -102,7 +106,7 @@ void update_midi_playback(const float deltaTime)
 		{
 			notes[i].finished = true;
 			played_keys[notes[i].pitch] = false;
-			stop_note_sound((unsigned int)notes[i].pitch);
+			if (!pedal_active) stop_note_sound((unsigned int)notes[i].pitch);
 		}
 	}
 }
