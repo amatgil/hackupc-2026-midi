@@ -94,6 +94,7 @@ int main(int argc, char *argv[]) {
 
     initEditor();
 
+
     float deltaTime = 0;
     while (!WindowShouldClose()) {
         deltaTime = GetFrameTime();

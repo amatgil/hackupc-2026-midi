@@ -305,11 +305,11 @@ void drawGUI(const Sheet& sheet) {
 }
 
 void recordSheet(Sheet& sheet) {
-    if(microphone_buffer.size() - last_processed_index >= FFT_CHUNK_SIZE) {
+    if(microphone_buffer.size() - last_processed_index > FFT_CHUNK_SIZE) {
         /*for (auto& el : microphone_buffer) {
             printf("%f\n", el);
             }*/
-        sheet = read_sheet_from_samples(microphone_buffer.data(), microphone_buffer.size(), 44100);
+        sheet = read_sheet_from_samples(microphone_buffer.data(), microphone_buffer.size(), AUDIO_RECORDING_SPEED);
         last_processed_index += FFT_CHUNK_SIZE;
     }
 }

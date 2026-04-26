@@ -7,10 +7,10 @@
 
 // Per tal que, per cada segon, a 44100Hz, n'hi hagui approx 20
 #define FFT_CHUNK_SIZE 2048
-#define MIN_NOTE_SIZE 3
-#define MAX_BEFORE_CLIPPING 4
+#define MIN_NOTE_SIZE 1
+#define MAX_BEFORE_CLIPPING 2
 // Half of root(2; 12)
-#define MAX_FREQ_RATIO_THRESHOLD 1.03
+#define MAX_FREQ_RATIO_THRESHOLD 1.035
 #define SMOOTHING_WINDOW_SIZE (FFT_CHUNK_SIZE/16)
 
 float *extreu_fft_from_samples(float *samples, size_t sample_length, float sampleRate);
@@ -28,3 +28,7 @@ Sheet pitches_to_sheet(float *pitches, size_t number_pitches, float sampleRate,
 
 Sheet read_sheet_from_samples(float *samples, size_t sample_length,
                               float sampleRate);
+
+void wavingInit();
+
+void wavingDeinit();

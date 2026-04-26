@@ -7,14 +7,12 @@
 
 
 
-
-
 float *extreu_fft_from_samples(float *samples, size_t sample_length,
                                float sampleRate) {
   int N = sample_length;
   fftw_complex *in = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * N);
   fftw_complex *out = in; // in-place
-  fftw_plan p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+  fftw_plan p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_MEASURE);
 
   for (int i = 0; i < N; ++i) {
     in[i][0] = samples[i];
@@ -91,7 +89,9 @@ double *which_pitch_is_playing_at_each_time_instance(float *samples,
 
 
     // new addition
-    //double freqs[] = {(double)((freqi-1) * sampleRate) / (double)FFT_CHUNK_SIZE, max_freq, (double)((freqi+1) * sampleRate) / (double)FFT_CHUNK_SIZE};
+    double freqs[] = {(double)((freqi-1) * sampleRate) / (double)FFT_CHUNK_SIZE, max_freq, (double)((freqi+1) * sampleRate) / (double)FFT_CHUNK_SIZE};
+
+    //max_freq = max_freq * fft_of_chunk[freqi]/(fft_of_chunk[freqi]+fft_of_chunk[freqi+of])
     //float interpolated_freq = interpolatedMax(fft_of_chunk+freqi-1, freqs);
 
     free(fft_of_chunk);
@@ -146,7 +146,7 @@ void smooth_out_pitches(double *pitches, size_t number_pitches) {
 // Takes samples at sample_rate and return Sheet
 Sheet pitches_to_sheet(double *pitches, size_t number_pitches, float sampleRate,
                        float offset) {
-  smooth_out_pitches(pitches, number_pitches);
+  //smooth_out_pitches(pitches, number_pitches);
   Sheet s;
 double past_note_frequency = 0;
 if(number_pitches > 0)
@@ -182,6 +182,7 @@ if(number_pitches > 0)
       }
 
   }
+  add_note_to_sheet(&s, offset, past_note_start_i, sampleRate, number_pitches-1, past_note_frequency);
   return s;
 }
 
