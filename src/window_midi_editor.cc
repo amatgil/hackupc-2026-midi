@@ -523,11 +523,12 @@ void drawSoundTimeline(Sheet &sheet) {
         fdstate.SelectFilePressed = false;
     }
 
-    GuiWindowFileDialog(&fdstate);
 
     drawPiano();
 
     drawGUI(sheet);
+
+    GuiWindowFileDialog(&fdstate);
 
     drawCursor();
 }
