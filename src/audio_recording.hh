@@ -1,11 +1,13 @@
+#pragma once
 /**
  * Fragment extret de https://github.com/mackron/miniaudio/blob/master/examples/simple_capture.c
  */
-#include "miniaudio.c"
+#include "miniaudio.h"
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <queue>
+#include "raylib.h"
 
 
 using namespace std;

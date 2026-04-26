@@ -1,3 +1,4 @@
+#pragma once
 /**
  * Fragment extret de https://github.com/mackron/miniaudio/blob/master/examples/simple_capture.c
  */
