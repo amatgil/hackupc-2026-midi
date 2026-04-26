@@ -26,6 +26,7 @@ typedef struct {
 	Vector2 size;
 	int pitch;
 	bool played;
+	bool finished;
 	bool is_flat;
 } midi_player_note;
 

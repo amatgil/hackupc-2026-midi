@@ -65,6 +65,7 @@ void play_midi(const Sheet& sheet)
 		notes[i].size = { width, height };
 		notes[i].pitch = pitch_adjusted;
 		notes[i].played = false;
+		notes[i].finished = false;
 		notes[i].is_flat = is_flat;
 
 		printf("Note %d: position=(%f, %f), size=(%f, %f)\n", i, x, y, width, height);
@@ -97,8 +98,9 @@ void update_midi_playback(const float deltaTime)
 			play_note_sound((unsigned int)notes[i].pitch, 2);
 		}
 
-		if (notes[i].position.y >= notes[i].size.y)
+		if (notes[i].position.y >= notes[i].size.y && !notes[i].finished)
 		{
+			notes[i].finished = true;
 			played_keys[notes[i].pitch] = false;
 			stop_note_sound((unsigned int)notes[i].pitch);
 		}
