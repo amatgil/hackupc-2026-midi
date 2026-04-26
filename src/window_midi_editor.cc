@@ -83,6 +83,9 @@ Rectangle getNoteRect(const Sheet &sheet, int i) {
 void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
 	if (tool == Playing) return;
 
+    Vector2 mPos = GetMousePosition();
+    if (mPos.y <= h * 0.1f || mPos.y >= h - (h * 0.05f)) return;
+
     if (dragging_note == i) {
         DrawRectangleLines(nRec.x, nRec.y, nRec.width, nRec.height, ORANGE);
         DrawRectangleLines(nRec.x + 1, nRec.y + 1, nRec.width - 1,
@@ -126,6 +129,9 @@ void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
 void splitTool(Vector2 mPos, Rectangle nRec, Sheet &sheet, int i) {
     if (tool == Playing) return;
 
+    Vector2 mPos = GetMousePosition();
+    if (mPos.y <= h * 0.1f || mPos.y >= h - (h * 0.05f)) return;
+
     if (CheckCollisionPointRec(mPos, nRec) and
         IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         sheet.attack_velocities.push_back(sheet.attack_velocities[i]);
@@ -143,6 +149,9 @@ void splitTool(Vector2 mPos, Rectangle nRec, Sheet &sheet, int i) {
 
 void removeNote(Sheet &sheet, int to_remove) {
     if (tool == Playing) return;
+
+    Vector2 mPos = GetMousePosition();
+    if (mPos.y <= h * 0.1f || mPos.y >= h - (h * 0.05f)) return;
 
     ut::swap(sheet.attack_velocities[to_remove],
              sheet.attack_velocities[sheet.attack_velocities.size() - 1]);
@@ -175,6 +184,9 @@ void initEditor() {
 void toolCreate(Sheet &sheet, Vector2 mPos) {
     if (tool == Playing) return;
 
+    Vector2 mPos = GetMousePosition();
+    if (mPos.y <= h * 0.1f || mPos.y >= h - (h * 0.05f)) return;
+
     palette_sheet.timestamps_start[0] =
         (mPos.x - xscroll_offset) / pixels_per_second;
     palette_sheet.pitch[0] = 87- (int)((mPos.y - yscroll_offset) / row_width);
@@ -183,6 +195,7 @@ void toolCreate(Sheet &sheet, Vector2 mPos) {
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		if (palette_sheet.pitch[0] > 87) palette_sheet.pitch[0] = 87;
 		if (palette_sheet.pitch[0] < 0) palette_sheet.pitch[0] = 0;
+		if (palette_sheet.timestamps_start[0] < 0) palette_sheet.timestamps_start[0] = 0;
         sheet.attack_velocities.push_back(palette_sheet.attack_velocities[0]);
         sheet.pitch.push_back(palette_sheet.pitch[0]);
         sheet.durations.push_back(palette_sheet.durations[0]);
