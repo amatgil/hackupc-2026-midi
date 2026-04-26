@@ -9,7 +9,7 @@
 #include <queue>
 #include "raylib.h"
 
-#define AUDIO_RECORDING_SPEED 44100*2
+#define AUDIO_RECORDING_SPEED 48000
 
 using namespace std;
 
