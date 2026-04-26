@@ -96,7 +96,6 @@ double *which_pitch_is_playing_at_each_time_instance(float *samples,
 
     free(fft_of_chunk);
 
-    printf("%f\n",max_freq);
     ret[i] = max_freq;
   }
   return ret;

@@ -497,7 +497,29 @@ void drawSoundTimeline(Sheet &sheet) {
     if(fdstate.SelectFilePressed) {
         std::string fname =  std::string(fdstate.dirPathText) + "/" + std::string(fdstate.fileNameText);
         // TODO: way 120?
+
+        if(fname[fname.size()-1] == 'd')
         sheet = read_midi_file(fname.c_str(), 120.f);
+        else {
+            Wave la = LoadWave(fname.c_str());
+            WaveFormat(&la, la.sampleRate, 32, 1);
+            float *samples_interleaved = LoadWaveSamples(la);
+            float *samples = (float *)malloc(la.frameCount * sizeof(float));
+            int N = la.frameCount;
+            if (la.channels == 1) {
+                samples = samples_interleaved;
+            } else if (la.channels == 2) {
+                for (int i = 0; i < N; ++i) {
+                    samples[i] = (double)((samples_interleaved[2 * i] +
+                                           samples_interleaved[2 * i + 1]) *
+                                          0.5); // Average
+                }
+                free(samples_interleaved);
+            }
+
+            sheet=
+                read_sheet_from_samples(samples, la.frameCount, la.sampleRate);
+        }
         fdstate.SelectFilePressed = false;
     }
 
