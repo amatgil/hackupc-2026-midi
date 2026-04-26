@@ -427,6 +427,7 @@ static inline int FileCompare(const char *d1, const char *d2, const char *dir)
 // Read files in new path
 static void ReloadDirectoryFiles(GuiWindowFileDialogState *state)
 {
+    if(state->dirFiles.paths != NULL)
     UnloadDirectoryFiles(state->dirFiles);
 
     state->dirFiles = LoadDirectoryFilesEx(state->dirPathText, (state->filterExt[0] == '\0')? NULL : state->filterExt, false);
