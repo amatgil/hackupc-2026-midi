@@ -48,22 +48,28 @@ void startPlaying(const Sheet& sheet) // <-- Afegim la Sheet com a paràmetre
     {
         editor_playback_notes[i].time = sheet.timestamps_start[i];
         editor_playback_notes[i].pitch = sheet.pitch[i];
-        editor_playback_notes[i].played = false;
+        editor_playback_notes[i].played = sheet.timestamps_start[i] <= playing_time;
     }
 }
 
-void drawGrid(int xoffset, int yoffset, int col_width, int row_width) {
+void drawGrid(int xoffset, int yoffset, float col_width, float row_width) {
     int h = GetRenderHeight();
     int w = GetRenderWidth();
-    int xfrac_off = xoffset % col_width;
-    int yfrac_off = yoffset % row_width;
-    for (int i = 0; i < (w / col_width) + 1; i++) {
-        DrawLine(i * col_width + xfrac_off, 0, i * col_width + xfrac_off, h,
-                 BLACK);
+
+    int first_col = std::floor(-xoffset / col_width);
+    int last_col = std::ceil((w - xoffset) / col_width);
+
+    for (int i = first_col; i <= last_col; i++) {
+        int x = (int)(i * col_width + xoffset);
+        DrawLine(x, 0, x, h, BLACK);
     }
-    for (int i = 0; i < (h / row_width) + 1; i++) {
-        DrawLine(0, i * row_width + yfrac_off, w, i * row_width + yfrac_off,
-                 BLACK);
+
+    int first_row = std::floor(-yoffset / row_width);
+    int last_row = std::ceil((h - yoffset) / row_width);
+
+    for (int i = first_row; i <= last_row; i++) {
+        int y = (int)(i * row_width + yoffset);
+        DrawLine(0, y, w, y, BLACK);
     }
 }
 
