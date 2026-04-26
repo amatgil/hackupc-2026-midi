@@ -335,8 +335,20 @@ void drawSoundTimeline(Sheet &sheet) {
         toolCreate(sheet, mPos);
     }
 
+    float menu_top = h * 0.1f;
+    float menu_bottom = h - (h * 0.05f);
+
     for (int i = 0; i < size; i++) {
         Rectangle nRec = getNoteRect(sheet, i);
+
+        if (nRec.x + nRec.width < 0 || nRec.x > w ||
+            nRec.y + nRec.height < menu_top || nRec.y > menu_bottom) {
+
+            if (dragging_note != i && to_remove != i) {
+                continue;
+            }
+        }
+
         DrawRectangleRounded(nRec, 0.5, 5, GRAY);
         BeginScissorMode(nRec.x,
                          nRec.y + row_width -
