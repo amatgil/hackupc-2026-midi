@@ -3,6 +3,7 @@
 #include "utils.hh"
 #include "window_common.hh"
 #include <array>
+#include <iostream>
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -30,6 +31,25 @@ Sheet palette_sheet;
 static array<Texture, 6> cursors;
 
 static float playing_time = 0.0f;
+static int editor_playback_notes_count = 0;
+static editorPlaybackNote* editor_playback_notes = nullptr;
+
+void startPlaying()
+{
+	std::cout << "Tu puta madre me cago en todoStarting playback" << std::endl;
+	if (tool == Playing) return;
+	tool = Playing;
+
+	if (editor_playback_notes) free(editor_playback_notes);
+	editor_playback_notes_count = palette_sheet.pitch.size();
+	editor_playback_notes = (editorPlaybackNote*)malloc(sizeof(editorPlaybackNote) * palette_sheet.pitch.size());
+    for (int i = 0; i < palette_sheet.pitch.size(); ++i)
+    {
+        editor_playback_notes[i].time = palette_sheet.timestamps_start[i];
+        editor_playback_notes[i].pitch = palette_sheet.pitch[i];
+        editor_playback_notes[i].played = false;
+	}
+}
 
 void drawGrid(int xoffset, int yoffset, int col_width, int row_width) {
     int h = GetRenderHeight();
@@ -199,7 +219,7 @@ void drawGUI() {
 	float button_width = button_height;
 
 	if (GuiButton((Rectangle) { 0.0125f * w, 0.0125f * h, button_width, button_height }, "PIANO")) tool = Create;
-	if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) tool = Playing;
+    if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) { if (tool != Playing) startPlaying(); else tool = Create; }
     if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) { playing_time = 0.0f; if (tool == Playing) tool = Create; }
 
 	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) { if (tool != Playing) tool = Create; }
@@ -233,10 +253,12 @@ void updateMidiEditor(const float deltaTime)
     if (tool == Playing) {
         playing_time += deltaTime;
 
-		for (int i = 0; i < palette_sheet.timestamps_start.size(); ++i) {
-            if (playing_time >= palette_sheet.timestamps_start[i] &&
-                playing_time < palette_sheet.timestamps_start[i] + palette_sheet.durations[i]) {
-                play_note_sound(palette_sheet.pitch[i], palette_sheet.attack_velocities[i]);
+        if (editor_playback_notes) {
+			for (int i = 0; i < editor_playback_notes_count; ++i) {
+                if (!editor_playback_notes[i].played && editor_playback_notes[i].time <= playing_time) {
+                    play_note_sound(editor_playback_notes[i].pitch, palette_sheet.attack_velocities[i]);
+                    editor_playback_notes[i].played = true;
+                }
             }
         }
     }
@@ -337,7 +359,12 @@ void drawSoundTimeline(Sheet &sheet) {
     } else if (IsKeyPressed(KEY_V) && tool != Playing) {
         tool = Volume;
 	} else if (IsKeyPressed(KEY_SPACE)) {
-        tool = (tool == Playing) ? Create : Playing;
+		if (tool != Playing) {
+            startPlaying();
+        }
+        else {
+            tool = Create;
+        }
     }
 
     drawPiano();
