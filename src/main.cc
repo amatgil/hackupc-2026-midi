@@ -71,8 +71,10 @@ int main(int argc, char* argv[])
     initialize_midi_player();
 
     //Sheet sheet = read_midi_file("../assets/testfiles/Op10No3Midi.mid", 120);
-    
-  Wave la = LoadWave("../assets/testfiles/guillem-doublenote.wav");
+
+  //Wave la = LoadWave("/tmp/A4.wav");
+  Wave la = LoadWave("./assets/testfiles/guillem_whistling.wav");
+  WaveFormat(&la, la.sampleRate, 32, 1);
   float *samples_interleaved = LoadWaveSamples(la);
   float* samples = (float*)malloc(la.frameCount*sizeof(float));
   int N = la.frameCount;

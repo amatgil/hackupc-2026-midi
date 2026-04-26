@@ -51,6 +51,12 @@ float* extreu_fft_from_wav(Wave* la) {
   return extreu_fft_from_samples(samples, la->frameCount, la->sampleRate);
 }
 
+float interpolatedMax(float* images, double* frequencies) {
+    double alpha = (images[1] - images[0])/(frequencies[1] - frequencies[0]);
+    double beta = (images[2] - images[0] - alpha*(frequencies[2]- frequencies[0]))/(frequencies[2] - frequencies[0])*(frequencies[2]- frequencies[1]);
+    return (frequencies[1] + frequencies[0])/2. - alpha/2.*beta;
+}
+
 // La mida de retorn és sample_length / FFT_CHUNK_SIZE
 double *which_pitch_is_playing_at_each_time_instance(float *samples,
                                                     size_t sample_length,
@@ -61,16 +67,29 @@ double *which_pitch_is_playing_at_each_time_instance(float *samples,
     float* chunk_de_samples = samples + FFT_CHUNK_SIZE*i;
     float* fft_of_chunk = extreu_fft_from_samples(chunk_de_samples, FFT_CHUNK_SIZE, sampleRate);
 
-    float max_freq = -1;
-    float max_freq_amplitude = -1;
+    // for (int j = 0; j < FFT_CHUNK_SIZE/2; j++) {
+    //     double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
+    //     printf("%f, %f\n", freq, fft_of_chunk[j]);
+    // }
+    // printf("===============");
+
+    float max_freq = 0;
+    float max_freq_amplitude = 0.00001;
+    int freqi = 0;
 
     for (int j = 0; j < FFT_CHUNK_SIZE/2; ++j) {
       double freq = (double)(j * sampleRate) / (double)FFT_CHUNK_SIZE;
       if (fft_of_chunk[j] > max_freq_amplitude) {
         max_freq_amplitude = fft_of_chunk[j];
         max_freq = freq;
+        freqi = j;
       }
     }
+
+
+    // new addition
+    //double freqs[] = {(double)((freqi-1) * sampleRate) / (double)FFT_CHUNK_SIZE, max_freq, (double)((freqi+1) * sampleRate) / (double)FFT_CHUNK_SIZE};
+    //float interpolated_freq = interpolatedMax(fft_of_chunk+freqi-1, freqs);
 
     free(fft_of_chunk);
 
@@ -83,7 +102,7 @@ unsigned int frequency_to_pitch(float freq) {
   // doubling here -> adding 12 there
   // 440Hz -> 48
 
-  float logarithm = log(freq/440) / log(2);
+  float logarithm = log2(freq/440);
   return 12 * logarithm + 48;
 }
 
@@ -125,7 +144,9 @@ Sheet pitches_to_sheet(double *pitches, size_t number_pitches, float sampleRate,
                        float offset) {
   smooth_out_pitches(pitches, number_pitches);
   Sheet s;
-  double past_note_frequency = 0; // Notes below 25Hz do not exist
+double past_note_frequency = 0;
+if(number_pitches > 0)
+     past_note_frequency = pitches[0]; // Notes below 25Hz do not exist
   unsigned int past_note_start_i = 0;
 
   double candidate_note_frequency = 0; // Notes below 25Hz do not exist
