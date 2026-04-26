@@ -202,14 +202,14 @@ void drawGUI() {
 	if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) tool = Playing;
     if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) { playing_time = 0.0f; if (tool == Playing) tool = Create; }
 
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) tool = Create;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height }, "DELETE")) tool = Delete;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.5f * w, 0.0125f * h, button_width, button_height }, "MOVE")) tool = Move;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height }, "SPLIT")) tool = Split;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height }, "VOLUME")) tool = Volume;
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) { if (tool != Playing) tool = Create; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height }, "DELETE")) { if (tool != Playing) tool = Delete; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.5f * w, 0.0125f * h, button_width, button_height }, "MOVE")) { if (tool != Playing) tool = Move; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height }, "SPLIT")) { if (tool != Playing) tool = Split; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height }, "VOLUME")) { if (tool != Playing) tool = Volume; }
 
-	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) tool = Create;
-	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) tool = Create;
+	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) { if (tool != Playing) tool = Create; }
+	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) { if (tool != Playing) tool = Create; }
 
     GuiSlider((Rectangle) { 0.02f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
     , "x min"
