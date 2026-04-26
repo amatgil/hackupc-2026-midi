@@ -3,7 +3,15 @@
 #include "window_common.hh"
 #include "note_player.hh"
 
+typedef struct {
+	float time;
+	int pitch;
+	bool played;
+} editorPlaybackNote;
+
 void drawGrid(int xoffset, int yoffset, int col_width, int row_width);
+
+void updateMidiEditor(const float deltaTime);
 
 void drawSoundTimeline(Sheet &sheet);
 

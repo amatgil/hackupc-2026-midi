@@ -3,6 +3,7 @@
 #include "utils.hh"
 #include "window_common.hh"
 #include <array>
+#include <iostream>
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -13,6 +14,7 @@ enum Tools {
     Split,
     Create,
     Volume,
+    Playing
 };
 
 static int xscroll_offset = 0;
@@ -28,18 +30,45 @@ static float new_note_duration = 1.0f;
 Sheet palette_sheet;
 static array<Texture, 6> cursors;
 
-void drawGrid(int xoffset, int yoffset, int col_width, int row_width) {
+static float playing_time = 0.0f;
+static int editor_playback_notes_count = 0;
+static editorPlaybackNote* editor_playback_notes = nullptr;
+
+void startPlaying(const Sheet& sheet)
+{
+    if (tool == Playing) return;
+    tool = Playing;
+
+    if (editor_playback_notes) free(editor_playback_notes);
+    editor_playback_notes_count = sheet.pitch.size();
+    editor_playback_notes = (editorPlaybackNote*)malloc(sizeof(editorPlaybackNote) * sheet.pitch.size());
+
+    for (int i = 0; i < sheet.pitch.size(); ++i)
+    {
+        editor_playback_notes[i].time = sheet.timestamps_start[i];
+        editor_playback_notes[i].pitch = sheet.pitch[i];
+        editor_playback_notes[i].played = sheet.timestamps_start[i] <= playing_time;
+    }
+}
+
+void drawGrid(int xoffset, int yoffset, float col_width, float row_width) {
     int h = GetRenderHeight();
     int w = GetRenderWidth();
-    int xfrac_off = xoffset % col_width;
-    int yfrac_off = yoffset % row_width;
-    for (int i = 0; i < (w / col_width) + 1; i++) {
-        DrawLine(i * col_width + xfrac_off, 0, i * col_width + xfrac_off, h,
-                 BLACK);
+
+    int first_col = std::floor(-xoffset / col_width);
+    int last_col = std::ceil((w - xoffset) / col_width);
+
+    for (int i = first_col; i <= last_col; i++) {
+        int x = (int)(i * col_width + xoffset);
+        DrawLine(x, 0, x, h, BLACK);
     }
-    for (int i = 0; i < (h / row_width) + 1; i++) {
-        DrawLine(0, i * row_width + yfrac_off, w, i * row_width + yfrac_off,
-                 BLACK);
+
+    int first_row = std::floor(-yoffset / row_width);
+    int last_row = std::ceil((h - yoffset) / row_width);
+
+    for (int i = first_row; i <= last_row; i++) {
+        int y = (int)(i * row_width + yoffset);
+        DrawLine(0, y, w, y, BLACK);
     }
 }
 
@@ -51,6 +80,13 @@ Rectangle getNoteRect(const Sheet &sheet, int i) {
 }
 
 void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
+	if (tool == Playing) return;
+
+    float w = (float)GetScreenWidth();
+    float h = (float)GetScreenHeight();
+    Vector2 mouse = GetMousePosition();
+    if (mouse.y <= h * 0.1f || mouse.y >= h - (h * 0.05f)) return;
+
     if (dragging_note == i) {
         DrawRectangleLines(nRec.x, nRec.y, nRec.width, nRec.height, ORANGE);
         DrawRectangleLines(nRec.x + 1, nRec.y + 1, nRec.width - 1,
@@ -92,6 +128,13 @@ void moveTool(Vector2 mPos, Rectangle &nRec, Sheet &sheet, int i) {
 }
 
 void splitTool(Vector2 mPos, Rectangle nRec, Sheet &sheet, int i) {
+    if (tool == Playing) return;
+
+    float w = (float)GetScreenWidth();
+    float h = (float)GetScreenHeight();
+    Vector2 mouse = GetMousePosition();
+    if (mouse.y <= h * 0.1f || mouse.y >= h - (h * 0.05f)) return;
+
     if (CheckCollisionPointRec(mPos, nRec) and
         IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         sheet.attack_velocities.push_back(sheet.attack_velocities[i]);
@@ -108,6 +151,13 @@ void splitTool(Vector2 mPos, Rectangle nRec, Sheet &sheet, int i) {
 }
 
 void removeNote(Sheet &sheet, int to_remove) {
+    if (tool == Playing) return;
+
+    float w = (float)GetScreenWidth();
+    float h = (float)GetScreenHeight();
+    Vector2 mouse = GetMousePosition();
+    if (mouse.y <= h * 0.1f || mouse.y >= h - (h * 0.05f)) return;
+
     ut::swap(sheet.attack_velocities[to_remove],
              sheet.attack_velocities[sheet.attack_velocities.size() - 1]);
     sheet.attack_velocities.pop_back();
@@ -137,6 +187,13 @@ void initEditor() {
 }
 
 void toolCreate(Sheet &sheet, Vector2 mPos) {
+    if (tool == Playing) return;
+
+    float w = (float)GetScreenWidth();
+    float h = (float)GetScreenHeight();
+    Vector2 mouse = GetMousePosition();
+    if (mouse.y <= h * 0.1f || mouse.y >= h - (h * 0.05f)) return;
+
     palette_sheet.timestamps_start[0] =
         (mPos.x - xscroll_offset) / pixels_per_second;
     palette_sheet.pitch[0] = 87- (int)((mPos.y - yscroll_offset) / row_width);
@@ -145,6 +202,7 @@ void toolCreate(Sheet &sheet, Vector2 mPos) {
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		if (palette_sheet.pitch[0] > 87) palette_sheet.pitch[0] = 87;
 		if (palette_sheet.pitch[0] < 0) palette_sheet.pitch[0] = 0;
+		if (palette_sheet.timestamps_start[0] < 0) palette_sheet.timestamps_start[0] = 0;
         sheet.attack_velocities.push_back(palette_sheet.attack_velocities[0]);
         sheet.pitch.push_back(palette_sheet.pitch[0]);
         sheet.durations.push_back(palette_sheet.durations[0]);
@@ -176,7 +234,7 @@ void drawPiano()
     );
 }
 
-void drawGUI() {
+void drawGUI(const Sheet& sheet) {
     float w = (float)GetScreenWidth();
     float h = (float)GetScreenHeight();
 
@@ -188,17 +246,17 @@ void drawGUI() {
 	float button_width = button_height;
 
 	if (GuiButton((Rectangle) { 0.0125f * w, 0.0125f * h, button_width, button_height }, "PIANO")) tool = Create;
-	if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) tool = Create;
-	if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) tool = Create;
+    if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) { if (tool != Playing) startPlaying(sheet); else tool = Create; }
+    if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) { playing_time = 0.0f; if (tool == Playing) tool = Create; }
 
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) tool = Create;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height }, "DELETE")) tool = Delete;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.5f * w, 0.0125f * h, button_width, button_height }, "MOVE")) tool = Move;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height }, "SPLIT")) tool = Split;
-	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height }, "VOLUME")) tool = Volume;
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) { if (tool != Playing) tool = Create; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.55f * w, 0.0125f * h, button_width, button_height }, "DELETE")) { if (tool != Playing) tool = Delete; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.5f * w, 0.0125f * h, button_width, button_height }, "MOVE")) { if (tool != Playing) tool = Move; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.45f * w, 0.0125f * h, button_width, button_height }, "SPLIT")) { if (tool != Playing) tool = Split; }
+	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.4f * w, 0.0125f * h, button_width, button_height }, "VOLUME")) { if (tool != Playing) tool = Volume; }
 
-	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) tool = Create;
-	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) tool = Create;
+	if (GuiButton((Rectangle) { w - button_width - 0.0125f * w, 0.0125f * h, button_width, button_height }, "FILE")) { if (tool != Playing) tool = Create; }
+	if (GuiButton((Rectangle) { w - button_width - 0.0625f * w, 0.0125f * h, button_width, button_height }, "VOICE")) { if (tool != Playing) tool = Create; }
 
     GuiSlider((Rectangle) { 0.02f * w, 0.975f * h, w * 0.115f, 0.00625f * h }
     , "x min"
@@ -208,13 +266,29 @@ void drawGUI() {
         , 200
         );
 
-    GuiSlider((Rectangle) { (1.0 - 0.02f - 0.115f) * w, 0.975f * h, w * 0.115f, 0.00625f * h }
+    GuiSlider((Rectangle) { (1.0f - 0.02f - 0.115f) * w, 0.975f * h, w * 0.115f, 0.00625f * h }
     , "y min"
         , "y Max"
         , & row_width
         , 10
         , 80
         );
+}
+
+void updateMidiEditor(const float deltaTime)
+{
+    if (tool == Playing) {
+        playing_time += deltaTime;
+
+        if (editor_playback_notes) {
+			for (int i = 0; i < editor_playback_notes_count; ++i) {
+                if (!editor_playback_notes[i].played && editor_playback_notes[i].time <= playing_time) {
+                    play_note_sound(editor_playback_notes[i].pitch, palette_sheet.attack_velocities[i]);
+                    editor_playback_notes[i].played = true;
+                }
+            }
+        }
+    }
 }
 
 void drawSoundTimeline(Sheet &sheet) {
@@ -224,6 +298,19 @@ void drawSoundTimeline(Sheet &sheet) {
         yscroll_offset += GetMouseWheelMove() * 30;
     else
         xscroll_offset += GetMouseWheelMove() * 30;
+
+    Vector2 mPos = GetMousePosition();
+    float float_h = (float)h;
+
+    bool isMouseOnTimeRuler = (mPos.y >= float_h - (float_h * 0.05f) - 30.0f) &&
+        (mPos.y < float_h - (float_h * 0.05f));
+    bool isMouseOnCanvas = (mPos.y > float_h * 0.1f) &&
+        (mPos.y < float_h - (float_h * 0.05f) - 30.0f);
+
+    if (tool != Playing && (isMouseOnCanvas || isMouseOnTimeRuler) && IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
+        float new_time = (mPos.x - xscroll_offset) / pixels_per_second;
+        playing_time = (new_time > 0.0f) ? new_time : 0.0f;
+    }
 
     ClearBackground(COLOR_BACKGROUND_DARK);
     int scissor_width = (xscroll_offset < 0) ? w - xscroll_offset : w;
@@ -251,15 +338,28 @@ void drawSoundTimeline(Sheet &sheet) {
         DrawText(TextFormat("%ds", s), x_pos + 5, text_y, 20, COLOR_EDITOR_TIME_STAMP);
     }
 
-    Vector2 mPos = GetMousePosition();
+    DrawLine(playing_time * pixels_per_second + xscroll_offset, 0, playing_time * pixels_per_second + xscroll_offset, h - (h * 0.05f), RED);
+
     size_t size = sheet.timestamps_start.size();
     unsigned int to_remove = -1;
     if (tool == Create) {
         toolCreate(sheet, mPos);
     }
 
+    float menu_top = h * 0.1f;
+    float menu_bottom = h - (h * 0.05f);
+
     for (int i = 0; i < size; i++) {
         Rectangle nRec = getNoteRect(sheet, i);
+
+        if (nRec.x + nRec.width < 0 || nRec.x > w ||
+            nRec.y + nRec.height < menu_top || nRec.y > menu_bottom) {
+
+            if (dragging_note != i && to_remove != i) {
+                continue;
+            }
+        }
+
         DrawRectangleRounded(nRec, 0.5, 5, GRAY);
         BeginScissorMode(nRec.x,
                          nRec.y + row_width -
@@ -299,21 +399,28 @@ void drawSoundTimeline(Sheet &sheet) {
         removeNote(sheet, to_remove);
     }
 
-    if (IsKeyReleased(KEY_S)) {
+    if (IsKeyReleased(KEY_S) && tool != Playing) {
         tool = Split;
-    } else if (IsKeyReleased(KEY_M)) {
+    } else if (IsKeyReleased(KEY_M) && tool != Playing) {
         tool = Move;
-    } else if (IsKeyPressed(KEY_E)) {
+    } else if (IsKeyPressed(KEY_E) && tool != Playing) {
         tool = Delete;
-    } else if (IsKeyPressed(KEY_C)) {
+    } else if (IsKeyPressed(KEY_C) && tool != Playing) {
         tool = Create;
-    } else if (IsKeyPressed(KEY_V)) {
+    } else if (IsKeyPressed(KEY_V) && tool != Playing) {
         tool = Volume;
+	} else if (IsKeyPressed(KEY_SPACE)) {
+		if (tool != Playing) {
+            startPlaying(sheet);
+        }
+        else {
+            tool = Create;
+        }
     }
 
     drawPiano();
 
-    drawGUI();
+    drawGUI(sheet);
 
     drawCursor();
 }
