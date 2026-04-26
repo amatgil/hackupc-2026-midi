@@ -4,7 +4,9 @@ A midi visualization and editing tool built for HackUPC2026.
 
 # Images 
 
-
+![Image of the editor](./assets/images/editor.png)
+![Image of the viewer](./assets/images/viewer.png)
+![Image of the file dialog popup](./assets/images/fileChooser.png)
 
 # Core Features
 
