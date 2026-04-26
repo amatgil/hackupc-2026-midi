@@ -34,21 +34,22 @@ static float playing_time = 0.0f;
 static int editor_playback_notes_count = 0;
 static editorPlaybackNote* editor_playback_notes = nullptr;
 
-void startPlaying()
+void startPlaying(const Sheet& sheet) // <-- Afegim la Sheet com a paràmetre
 {
-	std::cout << "Tu puta madre me cago en todoStarting playback" << std::endl;
-	if (tool == Playing) return;
-	tool = Playing;
+    std::cout << "Starting playback" << std::endl; // Mode zen activat
+    if (tool == Playing) return;
+    tool = Playing;
 
-	if (editor_playback_notes) free(editor_playback_notes);
-	editor_playback_notes_count = palette_sheet.pitch.size();
-	editor_playback_notes = (editorPlaybackNote*)malloc(sizeof(editorPlaybackNote) * palette_sheet.pitch.size());
-    for (int i = 0; i < palette_sheet.pitch.size(); ++i)
+    if (editor_playback_notes) free(editor_playback_notes);
+    editor_playback_notes_count = sheet.pitch.size(); // Utilitzem sheet, no palette_sheet
+    editor_playback_notes = (editorPlaybackNote*)malloc(sizeof(editorPlaybackNote) * sheet.pitch.size());
+
+    for (int i = 0; i < sheet.pitch.size(); ++i)
     {
-        editor_playback_notes[i].time = palette_sheet.timestamps_start[i];
-        editor_playback_notes[i].pitch = palette_sheet.pitch[i];
+        editor_playback_notes[i].time = sheet.timestamps_start[i];
+        editor_playback_notes[i].pitch = sheet.pitch[i];
         editor_playback_notes[i].played = false;
-	}
+    }
 }
 
 void drawGrid(int xoffset, int yoffset, int col_width, int row_width) {
@@ -207,7 +208,7 @@ void drawPiano()
     );
 }
 
-void drawGUI() {
+void drawGUI(const Sheet& sheet) {
     float w = (float)GetScreenWidth();
     float h = (float)GetScreenHeight();
 
@@ -219,7 +220,7 @@ void drawGUI() {
 	float button_width = button_height;
 
 	if (GuiButton((Rectangle) { 0.0125f * w, 0.0125f * h, button_width, button_height }, "PIANO")) tool = Create;
-    if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) { if (tool != Playing) startPlaying(); else tool = Create; }
+    if (GuiButton((Rectangle) { 0.0625f * w, 0.0125f * h, button_width, button_height }, "PLAY")) { if (tool != Playing) startPlaying(sheet); else tool = Create; }
     if (GuiButton((Rectangle) { 0.1125f * w, 0.0125f * h, button_width, button_height }, "STOP")) { playing_time = 0.0f; if (tool == Playing) tool = Create; }
 
 	if (GuiButton((Rectangle) { w - button_width / 2.0f - 0.6f * w, 0.0125f * h, button_width, button_height }, "CREATE")) { if (tool != Playing) tool = Create; }
@@ -360,7 +361,7 @@ void drawSoundTimeline(Sheet &sheet) {
         tool = Volume;
 	} else if (IsKeyPressed(KEY_SPACE)) {
 		if (tool != Playing) {
-            startPlaying();
+            startPlaying(sheet);
         }
         else {
             tool = Create;
@@ -369,7 +370,7 @@ void drawSoundTimeline(Sheet &sheet) {
 
     drawPiano();
 
-    drawGUI();
+    drawGUI(sheet);
 
     drawCursor();
 }
