@@ -8,14 +8,20 @@ int notes_count = 0;
 midi_player_note* notes = nullptr;
 
 Texture2D background_texture_checkerboard;
+Texture2D piano_white_keys;
+Texture2D piano_black_keys;
 
 float background_texture_x = 0.0f;
 float background_texture_y = 0.0f;
+
+bool played_keys[88] = { false };
 
 void initialize_midi_player()
 {
 	piano_texture = LoadTexture("../assets/ui/UI_MidiPlayer_Piano.png");
 	background_texture_checkerboard = LoadTexture("../assets/ui/UI_MidiPlayer_Background_Checkerboard.png");
+	piano_white_keys = LoadTexture("../assets/ui/UI_MidiPlayer_Piano_WhiteKeys.png");
+	piano_black_keys = LoadTexture("../assets/ui/UI_MidiPlayer_Piano_BlackKeys.png");
 
 	load_note_sounds();
 }
@@ -24,6 +30,8 @@ void unload_midi_player()
 {
 	UnloadTexture(piano_texture);
 	UnloadTexture(background_texture_checkerboard);
+	UnloadTexture(piano_white_keys);
+	UnloadTexture(piano_black_keys);
 
 	unload_note_sounds();
 
@@ -85,11 +93,13 @@ void update_midi_playback(const float deltaTime)
 		if (notes[i].position.y >= -notes[i].size.y && !notes[i].played)
 		{
 			notes[i].played = true;
+			played_keys[notes[i].pitch] = true;
 			play_note_sound((unsigned int)notes[i].pitch, 2);
 		}
 
 		if (notes[i].position.y >= notes[i].size.y)
 		{
+			played_keys[notes[i].pitch] = false;
 			stop_note_sound((unsigned int)notes[i].pitch);
 		}
 	}
@@ -97,19 +107,66 @@ void update_midi_playback(const float deltaTime)
 
 void draw_piano()
 {
-	Rectangle dest = { 0, (float)GetScreenHeight() * (1.0f - PIANO_VERTICAL_WINDOW_PROPORTION), (float)GetScreenWidth(), GetScreenHeight() * PIANO_VERTICAL_WINDOW_PROPORTION };
-	Vector2 origin = { 1.0f / 2.0f, 1.0f / 2.0f };
+	float screen_w = (float)GetScreenWidth();
+	float screen_h = (float)GetScreenHeight();
+	float piano_y = screen_h * (1.0f - PIANO_VERTICAL_WINDOW_PROPORTION);
+	float piano_h = screen_h * PIANO_VERTICAL_WINDOW_PROPORTION;
 
-	DrawTexturePro
-	(piano_texture,
+	Vector2 origin = { 0, 0 };
+
+	Rectangle dest = { 0, piano_y, screen_w, piano_h };
+	DrawTexturePro(piano_texture, { 0, 0, 2844, 350 }, dest, origin, 0, WHITE);
+}
+
+void draw_pressed_keys()
+{
+	float screen_w = (float)GetScreenWidth();
+	float screen_h = (float)GetScreenHeight();
+	float piano_y = screen_h * (1.0f - PIANO_VERTICAL_WINDOW_PROPORTION);
+	float piano_h = screen_h * PIANO_VERTICAL_WINDOW_PROPORTION;
+
+	Vector2 origin = { 0, 0 };
+
+	for (int i = 0; i < 88; ++i)
+	{
+		if (played_keys[i])
 		{
-			0,
-			0,
-			2844,
-			350
-		},
-		dest, origin, 0, WHITE
-	);
+			bool is_flat = flat_notes.find(i) != flat_notes.end();
+
+			// 1. Ampliem una mica el retall de la tecla negra perquè agafi tota l'ombra/vores del PNG. 
+			// Pots jugar amb aquest 0.6f fins que quedi clavada.
+			float world_width = is_flat ? 0.6f : 1.0f;
+
+			// 2. Recuperem l'offset perquè la X comenci just on toca
+			float x_offset = is_flat ? 0.25f : 0.0f;
+
+			// Sumem l'offset aquí
+			float normalized_x = pitch_to_position.at(i) + 26.0f + x_offset;
+
+			float tex_pixels_per_unit = 2844.0f / 52.0f;
+
+			Rectangle source_key = {
+				normalized_x * tex_pixels_per_unit,
+				0,
+				world_width * tex_pixels_per_unit,
+				350
+			};
+
+			float screen_pixels_per_unit = screen_w / 52.0f;
+
+			Rectangle dest_key = {
+				normalized_x * screen_pixels_per_unit,
+				piano_y,
+				world_width * screen_pixels_per_unit,
+				piano_h
+			};
+
+			DrawTexturePro(
+				is_flat ? piano_black_keys : piano_white_keys,
+				source_key, dest_key, origin, 0, is_flat ? COLOR_NOTE_FLAT : COLOR_NOTE
+			);
+		}
+	}
 }
 
 void draw_background()
@@ -163,8 +220,6 @@ void draw_midi_player_screen()
 	draw_background();
 	draw_background_gradient(WHITE);
 
-	draw_piano();
-
     BeginMode2D(_cam);
 
 	_cam.target = { 0, 0 };
@@ -178,12 +233,16 @@ void draw_midi_player_screen()
     for (int i = 0; i < notes_count; ++i)
     {
 		Vector2 inf = GetWorldToScreen2D({notes[i].position.x, notes[i].position.y + notes[i].size.y}, _cam);
-        if (inf.y < 0 |
-		    notes[i].position.y > 0) continue;
+        if (inf.y < 0 || notes[i].position.y > 0) continue;
 		DrawRectangleV(notes[i].position, notes[i].size, (notes[i].is_flat) ? COLOR_NOTE_FLAT : COLOR_NOTE);
 	}
+
 
 	DrawLine(-26, 0, 26, 0, BLACK);
 
     EndMode2D();
+
+	draw_piano();
+
+	draw_pressed_keys();
 }

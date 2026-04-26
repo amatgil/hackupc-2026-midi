@@ -1,7 +1,6 @@
 #include "note_player.hh"
 
 Sound note_sounds[88];
-bool notes_playing[88] = { false };
 
 void load_note_sounds()
 {
